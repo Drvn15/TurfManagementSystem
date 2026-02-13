@@ -2,8 +2,27 @@ import 'package:flutter/material.dart';
 import '../../services/api_services.dart';
 import 'add_turf_page.dart';
 
-class AdminTurfListScreen extends StatelessWidget {
+class AdminTurfListScreen extends StatefulWidget {
   const AdminTurfListScreen({super.key});
+
+  @override
+  State<AdminTurfListScreen> createState() => _AdminTurfListScreenState();
+}
+
+class _AdminTurfListScreenState extends State<AdminTurfListScreen> {
+  late Future<List<dynamic>> turfFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    turfFuture = ApiService.fetchTurfs();
+  }
+
+  void refresh() {
+    setState(() {
+      turfFuture = ApiService.fetchTurfs();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,15 +39,13 @@ class AdminTurfListScreen extends StatelessWidget {
                   builder: (_) => const AddTurfScreen(),
                 ),
               );
-
-              // Force rebuild after returning from Add Turf
-              (context as Element).markNeedsBuild();
+              refresh();
             },
           ),
         ],
       ),
       body: FutureBuilder<List<dynamic>>(
-        future: ApiService.fetchTurfs(),
+        future: turfFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -50,13 +67,7 @@ class AdminTurfListScreen extends StatelessWidget {
               final turf = turfs[index];
               return ListTile(
                 title: Text(turf['name']),
-                subtitle: Text(turf['location']),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () {
-                    // delete turf (already working, optional)
-                  },
-                ),
+                subtitle: Text("${turf['location']} • ₹${turf['price_per_hour']}"),
               );
             },
           );

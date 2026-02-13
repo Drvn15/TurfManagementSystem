@@ -1,54 +1,70 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://10.0.2.2:5000/api';
-  // Android emulator → 10.0.2.2
-  // Web → localhost
-  // Real device → your PC IP
+  static const String baseUrl = "http://10.0.2.2:5000/api";
+  static const FlutterSecureStorage _storage = FlutterSecureStorage();
 
-  // -------- USERS --------
+  static Future<Map<String, String>> _getHeaders() async {
+    String? token = await _storage.read(key: "jwt_token");
+
+    return {
+      "Content-Type": "application/json",
+      if (token != null) "Authorization": "Bearer $token",
+    };
+  }
+
+  // ---------------- GET USERS ----------------
   static Future<List<dynamic>> fetchUsers() async {
-    final response = await http.get(Uri.parse('$baseUrl/users'));
+    final response = await http.get(
+      Uri.parse("$baseUrl/users"),
+    );
 
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else {
-      throw Exception('Failed to load users');
-    }
+    return jsonDecode(response.body);
   }
 
-  // -------- TURFS --------
+  // ---------------- GET TURFS ----------------
   static Future<List<dynamic>> fetchTurfs() async {
-    final response = await http.get(Uri.parse('$baseUrl/turfs'));
+    final response = await http.get(
+      Uri.parse("$baseUrl/turfs"),
+    );
 
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else {
-      throw Exception('Failed to load turfs');
-    }
+    return jsonDecode(response.body);
   }
 
-  // -------- ADD TURF (ADMIN) --------
-  static Future<void> createTurf({
-    required String name,
-    required String location,
-    required int pricePerHour,
-    String imageUrl = '',
-  }) async {
+  // ---------------- CREATE TURF ----------------
+  static Future<bool> createTurf(
+      String name,
+      String location,
+      int price,
+      String imageUrl,
+      ) async {
+    final headers = await _getHeaders();
+
     final response = await http.post(
-      Uri.parse('$baseUrl/turfs'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'name': name,
-        'location': location,
-        'price_per_hour': pricePerHour,
-        'image_url': imageUrl,
+      Uri.parse("$baseUrl/turfs"),
+      headers: headers,
+      body: jsonEncode({
+        "name": name,
+        "location": location,
+        "price_per_hour": price,
+        "image_url": imageUrl,
       }),
     );
 
-    if (response.statusCode != 201) {
-      throw Exception('Failed to add turf');
-    }
+    return response.statusCode == 201;
+  }
+
+  // ---------------- DELETE TURF ----------------
+  static Future<bool> deleteTurf(int id) async {
+    final headers = await _getHeaders();
+
+    final response = await http.delete(
+      Uri.parse("$baseUrl/turfs/$id"),
+      headers: headers,
+    );
+
+    return response.statusCode == 200;
   }
 }

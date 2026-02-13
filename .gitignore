@@ -28,3 +28,25 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+# Flutter
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+ios/Pods/
+android/.gradle/
+android/app/build/
+
+# Node backend
+node_modules/
+.env
+
+# Logs
+*.log
+
+# OS
+Thumbs.db

@@ -31,11 +31,16 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Phone and password required" });
     }
 
-    const token = await loginUser(phone, password);
+    const { token, user } = await loginUser(phone, password);
 
     res.status(200).json({
-      message: "Login successful",
       token,
+      user: {
+        id: user.id,
+        name: user.name,
+        phone: user.phone,
+        role: user.role
+      }
     });
   } catch (err) {
     res.status(401).json({ message: err.message });

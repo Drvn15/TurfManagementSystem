@@ -15,7 +15,7 @@ const Booking = sequelize.define(
       allowNull: false,
     },
 
-    turf_id: {
+    court_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },

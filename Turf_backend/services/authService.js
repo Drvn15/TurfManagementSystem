@@ -2,7 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
-const JWT_SECRET = "super_secret_key"; // later move to .env
+
 
 // Register user
 const registerUser = async (name, phone, password, role = "USER") => {
@@ -39,13 +39,20 @@ const loginUser = async (phone, password) => {
   }
 
   const token = jwt.sign(
-    { id: user.id, role: user.role },
-    JWT_SECRET,
+    {
+      id: user.id,
+      role: user.role
+    },
+    process.env.JWT_SECRET,
     { expiresIn: "1d" }
   );
 
-  return token;
+  return {
+    token,
+    user
+  };
 };
+
 
 module.exports = {
   registerUser,

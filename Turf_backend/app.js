@@ -6,6 +6,8 @@ const userRoutes = require("./routes/users.routes");
 const turfRoutes = require("./routes/turfs.routes");
 const authRoutes = require("./routes/authRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
+const sportRoutes = require("./routes/sports.routes");
+const courtRoutes = require("./routes/court.routes");
 
 
 const app = express();
@@ -23,6 +25,8 @@ app.use("/api", userRoutes);
 app.use("/api", turfRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/bookings", bookingRoutes);
+app.use("/api/sports", sportRoutes);
+app.use("/api/courts", courtRoutes);
   
 
 module.exports = app;

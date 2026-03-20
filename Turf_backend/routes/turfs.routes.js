@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+
 const Turf = require("../models/Turf");
 const { authenticate, adminOnly } = require("../middleware/authMiddleware");
 
@@ -34,6 +35,34 @@ router.post("/turfs", authenticate, adminOnly, async (req, res) => {
     res.status(500).json({ error: "Failed to create turf" });
   }
 });
+
+// ---------------- UPDATE TURF (ADMIN ONLY) ----------------
+router.put("/turfs/:id", authenticate, adminOnly, async (req, res) => {
+  try {
+    const turf = await Turf.findByPk(req.params.id);
+
+    if (!turf) {
+      return res.status(404).json({ error: "Turf not found" });
+    }
+
+    const { name, location, image_url } = req.body;
+
+    await turf.update({
+      name: name ?? turf.name,
+      location: location ?? turf.location,
+      image_url: image_url ?? turf.image_url,
+    });
+
+    res.json({
+      message: "Turf updated successfully",
+      turf,
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: "Failed to update turf" });
+  }
+});
+
 
 // ---------------- DELETE TURF (ADMIN ONLY) ----------------
 router.delete("/turfs/:id", authenticate, adminOnly, async (req, res) => {

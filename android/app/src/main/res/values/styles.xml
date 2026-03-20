@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <!-- Theme shown instantly when app icon is tapped -->
     <style name="LaunchTheme" parent="@android:style/Theme.NoTitleBar">
-        <item name="android:windowBackground">@color/splash_background</item>
+        <item name="android:windowBackground">@drawable/launch_background</item>
         <item name="android:windowFullscreen">true</item>
     </style>
 
-    <!-- Normal theme after Flutter UI loads -->
     <style name="NormalTheme" parent="@android:style/Theme.NoTitleBar">
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>
-
 </resources>

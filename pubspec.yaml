@@ -13,13 +13,25 @@ dependencies:
   cupertino_icons: ^1.0.8
   http: ^1.2.0
   flutter_secure_storage: ^10.0.0
+  flutter_riverpod: ^2.5.1
+  dio: ^5.4.0
+  image_picker: ^1.0.4
+  flutter_map: ^6.0.0
+  latlong2: ^0.9.0
+  geolocator: ^10.1.0
+  geocoding: ^2.1.0
+  permission_handler: ^11.0.1
+  lottie: ^3.3.1
+  video_player: ^2.9.5
+
+
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.4
-  flutter_native_splash: ^2.4.0
+  #flutter_native_splash: ^2.4.0
 
 
 flutter:
@@ -27,15 +39,14 @@ flutter:
 
   assets:
     - assets/icon/app_icon.png
+    - assets/Final.json
+    - assets/Final.mp4
 
 flutter_launcher_icons:
   android: true
   ios: true
   image_path: assets/icon/app_icon.png
 
-  flutter_native_splash:
-    color: "#0B5F3C"
-    android: true
-    ios: true
-    fullscreen: true
+
+
 

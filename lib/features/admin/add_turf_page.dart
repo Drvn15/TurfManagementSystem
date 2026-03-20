@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../services/api_services.dart';
+import '../../core/api/api_client.dart';
 
 class AddTurfScreen extends StatefulWidget {
   const AddTurfScreen({super.key});
@@ -15,34 +15,38 @@ class _AddTurfScreenState extends State<AddTurfScreen> {
   final imageCtrl = TextEditingController();
 
   bool isLoading = false;
+  final ApiClient _api = ApiClient();
 
   Future<void> saveTurf() async {
     setState(() => isLoading = true);
 
-    bool success = await ApiService.createTurf(
-      nameCtrl.text.trim(),
-      locationCtrl.text.trim(),
-      int.parse(priceCtrl.text.trim()),
-      imageCtrl.text.trim(),
-    );
-
-    setState(() => isLoading = false);
-
-    if (!mounted) return;
-
-    if (success) {
-      Navigator.pop(context);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to create turf")),
+    try {
+      await _api.post(
+        "/turfs",
+        body: {
+          "name": nameCtrl.text.trim(),
+          "location": locationCtrl.text.trim(),
+          "price_per_hour": int.parse(priceCtrl.text.trim()),
+          "image_url": imageCtrl.text.trim(),
+        },
       );
+
+      if (!mounted) return;
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to create turf: ${e.toString()}")),
+      );
+    } finally {
+      setState(() => isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Turf')),
+      appBar: AppBar(title: Text('Add Turf')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: SingleChildScrollView(
@@ -52,30 +56,28 @@ class _AddTurfScreenState extends State<AddTurfScreen> {
                 controller: nameCtrl,
                 decoration: const InputDecoration(labelText: 'Turf Name'),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               TextField(
                 controller: locationCtrl,
                 decoration: const InputDecoration(labelText: 'Location'),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               TextField(
                 controller: priceCtrl,
                 keyboardType: TextInputType.number,
-                decoration:
-                const InputDecoration(labelText: 'Price per hour'),
+                decoration: const InputDecoration(labelText: 'Price per hour'),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               TextField(
                 controller: imageCtrl,
-                decoration:
-                const InputDecoration(labelText: 'Image URL (optional)'),
+                decoration: const InputDecoration(labelText: 'Image URL (optional)'),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               isLoading
                   ? const CircularProgressIndicator()
                   : ElevatedButton(
                 onPressed: saveTurf,
-                child: const Text('Save Turf'),
+                child: Text('Save Turf'),
               ),
             ],
           ),

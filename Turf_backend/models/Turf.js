@@ -9,6 +9,14 @@ const Turf = sequelize.define(
       primaryKey: true,
       autoIncrement: true,
     },
+    owner_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "Users",
+        key: "id",
+      },
+    },
     name: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -16,6 +24,11 @@ const Turf = sequelize.define(
     location: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    price_per_hour: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
     },
     image_url: {
       type: DataTypes.STRING,

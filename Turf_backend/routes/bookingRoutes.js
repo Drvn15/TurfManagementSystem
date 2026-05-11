@@ -1,74 +1,71 @@
+// routes/bookingRoutes.js
+
 const express = require("express");
 const router = express.Router();
 
-const { authenticate } = require("../middleware/authMiddleware");
+// Controllers
 const {
   createBooking,
   getAvailability,
+  cancelBooking,
+  getMyBookings,
 } = require("../controllers/bookingController");
 
-// ---------------- CREATE BOOKING ----------------
-router.post("/", authenticate, createBooking);
+// Middleware
+const validateBooking = require("../middleware/bookingValidation");
+const {authenticate} = require("../middleware/authMiddleware");
 
-// ---------------- GET AVAILABILITY (COURT-BASED) ----------------
-router.get("/availability/:courtId", authenticate, getAvailability);
+/**
+ * CREATE BOOKING
+ * Flow:
+ * Auth → Validation → Controller → DB
+ */
+router.post(
+  "/book",
+  authenticate,
+  validateBooking,
+  createBooking
+);
 
-// ---------------- GET MY BOOKINGS ----------------
-router.get("/my", authenticate, async (req, res) => {
-  try {
-    const Booking = require("../models/Booking");
-    const userId = req.user.id;
+// Compatibility route for frontend REST-style create
+router.post(
+  "/",
+  authenticate,
+  validateBooking,
+  createBooking
+);
 
-    const bookings = await Booking.findAll({
-      where: { user_id: userId },
-      order: [["date", "DESC"]],
-    });
+/**
+ * GET AVAILABILITY
+ * Public (or protect if needed)
+ */
+router.get(
+  "/availability/:courtId",
+  getAvailability
+);
 
-    return res.json(bookings);
-  } catch (error) {
-    return res.status(500).json({
-      error: "Failed to fetch bookings",
-    });
-  }
-});
+/**
+ * Cancellation
+ * Checks Ownership
+ */
+router.patch(
+  "/cancel/:bookingId",
+  authenticate,
+  cancelBooking
+);
 
-// ---------------- CANCEL BOOKING ----------------
-router.patch("/:id/cancel", authenticate, async (req, res) => {
-  try {
-    const Booking = require("../models/Booking");
+// Compatibility route for frontend REST-style cancel
+router.patch(
+  "/:bookingId/cancel",
+  authenticate,
+  cancelBooking
+);
 
-    const bookingId = req.params.id;
-    const userId = req.user.id;
-    const userRole = req.user.role;
-
-    const booking = await Booking.findByPk(bookingId);
-
-    if (!booking) {
-      return res.status(404).json({ error: "Booking not found" });
-    }
-
-    if (booking.user_id !== userId && userRole !== "ADMIN") {
-      return res.status(403).json({ error: "Not authorized" });
-    }
-
-    if (booking.status !== "CONFIRMED") {
-      return res.status(400).json({
-        error: "Only confirmed bookings can be cancelled",
-      });
-    }
-
-    booking.status = "CANCELLED";
-    await booking.save();
-
-    return res.json({
-      message: "Booking cancelled successfully",
-      booking,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      error: "Failed to cancel booking",
-    });
-  }
-});
+// My bookings (used by frontend)
+router.get(
+  "/my",
+  authenticate,
+  getMyBookings
+);
 
 module.exports = router;

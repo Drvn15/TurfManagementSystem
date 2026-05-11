@@ -45,13 +45,12 @@ class _UserSportListScreenState extends ConsumerState<UserSportListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.turf['name'] ?? 'Select Sport'),
-        backgroundColor: AppTheme.purplePrimary,
       ),
       body: FutureBuilder<List<dynamic>>(
         future: _sportsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (snapshot.hasError || _errorMessage != null) {
@@ -59,22 +58,22 @@ class _UserSportListScreenState extends ConsumerState<UserSportListScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  SizedBox(height: 16),
+                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                  const SizedBox(height: 16),
                   Text(
                     'Error loading sports',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
                     _errorMessage ?? snapshot.error.toString(),
                     textAlign: TextAlign.center,
                     style: const TextStyle(color: Colors.grey),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: _fetchSports,
-                    child: Text('Retry'),
+                    child: const Text('Retry'),
                   ),
                 ],
               ),
@@ -88,14 +87,14 @@ class _UserSportListScreenState extends ConsumerState<UserSportListScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.sports, size: 64, color: Colors.grey),
-                  SizedBox(height: 16),
+                  const Icon(Icons.sports, size: 64, color: Colors.grey),
+                  const SizedBox(height: 16),
                   Text(
                     'No sports available',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  SizedBox(height: 8),
-                  Text(
+                  const SizedBox(height: 8),
+                  const Text(
                     'This turf hasn\'t added any sports yet',
                     style: TextStyle(color: Colors.grey),
                   ),
@@ -127,30 +126,32 @@ class _UserSportListScreenState extends ConsumerState<UserSportListScreen> {
                     ),
                   );
                 },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: AppTheme.purpleLight,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppTheme.purplePrimary.withOpacity(0.3)),
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.sports_tennis,
-                        size: 48,
-                        color: AppTheme.purplePrimary,
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        sport['name'] ?? '',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                  elevation: 2,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.sports_tennis,
+                          size: 48,
+                          color: DesignSystem.primaryIndigo,
                         ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
+                        const SizedBox(height: 12),
+                        Text(
+                          sport['name'] ?? '',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );

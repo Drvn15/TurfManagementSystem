@@ -89,6 +89,7 @@ class _SportListScreenState extends ConsumerState<SportListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.purpleBackground,
       appBar: AppBar(
         title: Text("Sports at ${widget.turf['name']}"),
         backgroundColor: AppTheme.purplePrimary,
@@ -198,10 +199,13 @@ class _SportListScreenState extends ConsumerState<SportListScreen> {
                       );
                       _fetchSports();
                     },
-                    icon: Icon(Icons.add),
-                    label: Text("Add Sport"),
+                    icon: const Icon(Icons.add),
+                    label: const Text("Add Sport"),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.purplePrimary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
                   ),
                 ],
@@ -219,18 +223,23 @@ class _SportListScreenState extends ConsumerState<SportListScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
+                elevation: 2,
                 child: ListTile(
+                  tileColor: AppTheme.purpleLight,
                   contentPadding: const EdgeInsets.all(16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   leading: Container(
                     width: 50,
                     height: 50,
                     decoration: BoxDecoration(
-                      color: AppTheme.purpleLight,
+                      color: AppTheme.purpleBackground,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.sports_tennis,
-                      color: AppTheme.purplePrimary,
+                      color: Colors.white,
                     ),
                   ),
                   title: Text(
@@ -241,7 +250,7 @@ class _SportListScreenState extends ConsumerState<SportListScreen> {
                     ),
                   ),
                   subtitle: Text(
-                    'Click to manage courts',
+                    'Tap to manage courts',
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey.shade600,

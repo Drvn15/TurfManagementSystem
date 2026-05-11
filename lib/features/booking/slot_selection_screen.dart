@@ -105,6 +105,7 @@ class _SlotSelectionScreenState extends ConsumerState<SlotSelectionScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
+              final messenger = ScaffoldMessenger.of(context);
               Navigator.pop(context);
 
               await ref
@@ -118,9 +119,10 @@ class _SlotSelectionScreenState extends ConsumerState<SlotSelectionScreen> {
 
               final bookingState = ref.read(bookingControllerProvider);
 
+              if (!mounted) return;
+
               if (bookingState.status == BookingStatus.success) {
-                if (!mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
+                messenger.showSnackBar(
                   const SnackBar(
                     content: Text("Booking successful!"),
                     backgroundColor: Colors.green,
@@ -129,8 +131,7 @@ class _SlotSelectionScreenState extends ConsumerState<SlotSelectionScreen> {
 
                 _loadAvailability();
               } else if (bookingState.status == BookingStatus.error) {
-                if (!mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
+                messenger.showSnackBar(
                   SnackBar(
                     content: Text(bookingState.message ?? "Booking failed"),
                     backgroundColor: Colors.red,
@@ -153,86 +154,82 @@ class _SlotSelectionScreenState extends ConsumerState<SlotSelectionScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(courtName),
-        backgroundColor: AppTheme.purplePrimary,
       ),
       body: Column(
         children: [
-          // Court Info Card
-          Container(
-            padding: const EdgeInsets.all(16),
-            margin: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppTheme.purpleLight,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppTheme.purplePrimary.withOpacity(0.3)),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.court['slot_type'] == 'hourly' ? 'Hourly Slots' : '30-min Slots',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: DesignSystem.backgroundWhite,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: DesignSystem.shadowSmall,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.court['slot_type'] == 'hourly' ? 'Hourly Slots' : '30-min Slots',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Colors.grey.shade700,
+                            ),
                       ),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      "₹$courtPrice",
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.purplePrimary,
+                      const SizedBox(height: 6),
+                      Text(
+                        '₹$courtPrice',
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              color: DesignSystem.primaryIndigo,
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
-                    ),
-                  ],
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      _formatTime(widget.court['morning_start']),
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                    Text("Morning"),
-                    Text(
-                      _formatTime(widget.court['evening_start']),
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        _formatTime(widget.court['morning_start']),
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      const Text('Morning'),
+                      Text(
+                        _formatTime(widget.court['evening_start']),
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
-
-          // Turf & Sport Info
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
-                    color: AppTheme.purpleLight,
-                    borderRadius: BorderRadius.circular(20),
+                    color: DesignSystem.backgroundLight,
+                    borderRadius: BorderRadius.circular(24),
                   ),
                   child: Text(
                     widget.turfName,
                     style: TextStyle(
-                      color: AppTheme.purplePrimary,
+                      color: DesignSystem.primaryIndigo,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
                     color: Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(24),
                   ),
                   child: Text(
                     widget.sportName,
@@ -244,10 +241,7 @@ class _SlotSelectionScreenState extends ConsumerState<SlotSelectionScreen> {
               ],
             ),
           ),
-
-          SizedBox(height: 16),
-
-          // Date Selector
+          const SizedBox(height: 16),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
@@ -255,8 +249,8 @@ class _SlotSelectionScreenState extends ConsumerState<SlotSelectionScreen> {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.calendar_today, size: 20, color: Colors.grey),
-                    SizedBox(width: 8),
+                    const Icon(Icons.calendar_today, size: 20, color: Colors.grey),
+                    const SizedBox(width: 8),
                     Text(
                       formattedDate,
                       style: const TextStyle(
@@ -268,18 +262,12 @@ class _SlotSelectionScreenState extends ConsumerState<SlotSelectionScreen> {
                 ),
                 ElevatedButton(
                   onPressed: _pickDate,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.purplePrimary,
-                  ),
-                  child: Text("Change Date"),
+                  child: const Text('Change Date'),
                 ),
               ],
             ),
           ),
-
-          SizedBox(height: 16),
-
-          // Error Message (if any)
+          const SizedBox(height: 16),
           if (_errorMessage != null)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -287,13 +275,13 @@ class _SlotSelectionScreenState extends ConsumerState<SlotSelectionScreen> {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: Colors.red.shade50,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: Colors.red.shade200),
                 ),
                 child: Row(
                   children: [
                     Icon(Icons.error_outline, color: Colors.red.shade700),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         _errorMessage!,
@@ -304,16 +292,13 @@ class _SlotSelectionScreenState extends ConsumerState<SlotSelectionScreen> {
                 ),
               ),
             ),
-
-          SizedBox(height: 8),
-
-          // Slots Grid
+          const SizedBox(height: 8),
           Expanded(
             child: FutureBuilder<List<Slot>>(
               future: _availabilityFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(
+                  return const Center(
                     child: CircularProgressIndicator(),
                   );
                 }
@@ -323,22 +308,22 @@ class _SlotSelectionScreenState extends ConsumerState<SlotSelectionScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.error_outline, size: 48, color: Colors.red),
-                        SizedBox(height: 16),
+                        const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                        const SizedBox(height: 16),
                         Text(
-                          "Failed to load availability",
+                          'Failed to load availability',
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Text(
                           snapshot.error.toString(),
                           textAlign: TextAlign.center,
                           style: const TextStyle(color: Colors.grey),
                         ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: _loadAvailability,
-                          child: Text("Retry"),
+                          child: const Text('Retry'),
                         ),
                       ],
                     ),
@@ -352,15 +337,15 @@ class _SlotSelectionScreenState extends ConsumerState<SlotSelectionScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.event_busy, size: 64, color: Colors.grey),
-                        SizedBox(height: 16),
+                        const Icon(Icons.event_busy, size: 64, color: Colors.grey),
+                        const SizedBox(height: 16),
                         Text(
-                          "No slots available",
+                          'No slots available',
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Text(
-                          "Try selecting a different date",
+                          'Try selecting a different date',
                           style: TextStyle(color: Colors.grey.shade600),
                         ),
                       ],
@@ -386,22 +371,22 @@ class _SlotSelectionScreenState extends ConsumerState<SlotSelectionScreen> {
                           : null,
                       style: OutlinedButton.styleFrom(
                         backgroundColor: slot.available
-                            ? AppTheme.purpleLight
+                            ? DesignSystem.backgroundLight
                             : Colors.grey[300],
                         side: BorderSide(
                           color: slot.available
-                              ? AppTheme.purplePrimary
+                              ? DesignSystem.primaryIndigo
                               : Colors.grey,
                         ),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                       child: Text(
-                        "${slot.startTime} - ${slot.endTime}",
+                        '${slot.startTime} - ${slot.endTime}',
                         style: TextStyle(
                           color: slot.available
-                              ? AppTheme.purplePrimary
+                              ? DesignSystem.primaryIndigo
                               : Colors.grey,
                           fontWeight: slot.available ? FontWeight.w600 : FontWeight.normal,
                         ),

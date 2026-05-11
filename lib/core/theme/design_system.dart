@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 class DesignSystem {
   // ==================== COLORS ====================
   // Primary Palette
-  static const Color primaryIndigo = Color(0xFF0C0E68);
-  static const Color primaryLight = Color(0xFF3A3E8F);
-  static const Color primaryDark = Color(0xFF07094A);
+  static const Color primaryIndigo = Color(0xFF6C4CF1);
+  static const Color primaryLight = Color(0xFF8B7CF8);
+  static const Color primaryDark = Color(0xFF4D3BC7);
 
   // Background Palette
   static const Color backgroundLavender = Color(0xFFDADBFA);
@@ -136,6 +136,13 @@ class DesignSystem {
     height: lineHeightTight,
   );
 
+  static const TextStyle headline5 = TextStyle(
+    fontSize: fontSizeH5,
+    fontWeight: fontWeightMedium,
+    color: textPrimary,
+    height: lineHeightTight,
+  );
+
   static const TextStyle bodyLarge = TextStyle(
     fontSize: fontSizeBodyLarge,
     fontWeight: fontWeightRegular,
@@ -174,6 +181,7 @@ class DesignSystem {
   // ==================== SPACING ====================
   static const double spacing2 = 2;
   static const double spacing4 = 4;
+  static const double spacing6 = 6;
   static const double spacing8 = 8;
   static const double spacing12 = 12;
   static const double spacing16 = 16;
@@ -206,6 +214,7 @@ class DesignSystem {
   static const EdgeInsets marginAll24 = EdgeInsets.all(spacing24);
   static const EdgeInsets marginBottom16 = EdgeInsets.only(bottom: spacing16);
   static const EdgeInsets marginBottom24 = EdgeInsets.only(bottom: spacing24);
+  static const EdgeInsets marginBottom12 = EdgeInsets.only(bottom: spacing12);
 
   // Gap sizing
   static const SizedBox gap4 = SizedBox(height: spacing4, width: spacing4);
@@ -214,6 +223,12 @@ class DesignSystem {
   static const SizedBox gap16 = SizedBox(height: spacing16, width: spacing16);
   static const SizedBox gap24 = SizedBox(height: spacing24, width: spacing24);
   static const SizedBox gap32 = SizedBox(height: spacing32, width: spacing32);
+  static const SizedBox gap40 = SizedBox(height: spacing40, width: spacing40);
+  static const SizedBox gap48 = SizedBox(height: spacing48, width: spacing48);
+  static const SizedBox gap56 = SizedBox(height: spacing56, width: spacing56);
+  static const SizedBox gap64 = SizedBox(height: spacing64, width: spacing64);
+  static const SizedBox gap80 = SizedBox(height: spacing80, width: spacing80);
+  static const SizedBox gap96 = SizedBox(height: spacing96, width: spacing96);
 
   // ==================== BORDER RADIUS ====================
   static const double radiusSmall = 8;

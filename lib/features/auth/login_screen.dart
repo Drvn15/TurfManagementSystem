@@ -20,7 +20,7 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  static const Color _background = Color(0xFFF5F5F5);
+  static const Color _background = DesignSystem.backgroundLavender;
   static const Color _textPrimary = Colors.black;
   static const Color _textSecondary = Color(0xFF5A5A5A);
   static const Color _accent = Colors.black;

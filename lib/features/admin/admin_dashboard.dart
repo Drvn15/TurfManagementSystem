@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart'; // ADD THIS IMPORT for DioException
 import '../../core/api/api_client.dart';
-import '../../core/theme/app_theme.dart';
+import '../../core/theme/design_system.dart';
 import '../auth/auth_controller.dart';
 import 'add_turf_details_screen.dart';
+import 'admin_manage_turfs_screen.dart';
+import 'admin_profile_screen.dart';
 import 'edit_turf_screen.dart';
 import 'sport_list_screen.dart';
 
@@ -15,16 +17,31 @@ class AdminDashboard extends ConsumerStatefulWidget {
   ConsumerState<AdminDashboard> createState() => _AdminDashboardState();
 }
 
-class _AdminDashboardState extends ConsumerState<AdminDashboard> {
+class _AdminDashboardState extends ConsumerState<AdminDashboard> with TickerProviderStateMixin {
   final ApiClient _api = ApiClient();
   List<dynamic> _turfs = [];
   bool _isLoading = true;
   String? _errorMessage;
+  late AnimationController _fadeController;
+  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
+    _fadeController = AnimationController(
+      duration: DesignSystem.animationNormal,
+      vsync: this,
+    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
+    );
     _fetchTurfs();
+  }
+
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchTurfs() async {
@@ -40,6 +57,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
           _turfs = response;
           _isLoading = false;
         });
+        _fadeController.forward(from: 0.0);
       } else {
         setState(() {
           _turfs = [];
@@ -81,7 +99,6 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
     setState(() => _isLoading = true);
 
     try {
-      print("🗑️ Attempting to delete turf: $turfId");
       await _api.delete("/turfs/$turfId");
 
       if (!mounted) return;
@@ -95,8 +112,6 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
 
       _fetchTurfs();
     } catch (e) {
-      print("❌ Delete error: $e");
-
       String errorMessage = "Failed to delete turf";
 
       // Check if it's a DioException
@@ -142,59 +157,155 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.purpleBackground,
+      backgroundColor: DesignSystem.backgroundLavender,
       appBar: AppBar(
-        title: Text("Admin Dashboard"),
-        backgroundColor: AppTheme.purplePrimary,
+        title: const Text("Admin Dashboard"),
+        backgroundColor: DesignSystem.primaryIndigo,
+        foregroundColor: DesignSystem.textWhite,
+        elevation: DesignSystem.elevation0,
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh),
+            icon: Icon(Icons.refresh, color: DesignSystem.textWhite),
             onPressed: _fetchTurfs,
           ),
           IconButton(
-            icon: Icon(Icons.logout),
+            icon: Icon(Icons.logout, color: DesignSystem.textWhite),
             onPressed: () {
               ref.read(authControllerProvider.notifier).logout();
             },
           ),
         ],
       ),
+      drawer: _buildDrawer(),
       body: _isLoading
           ? Center(
         child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+          valueColor: AlwaysStoppedAnimation<Color>(DesignSystem.primaryIndigo),
         ),
       )
           : _errorMessage != null
-          ? Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
-            SizedBox(height: 16),
-            Text(
-              _errorMessage!,
-              style: const TextStyle(color: Colors.white),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _fetchTurfs,
-              child: Text("Retry"),
-            ),
-          ],
-        ),
-      )
+          ? _buildErrorState()
           : _turfs.isEmpty
           ? _buildEmptyState()
           : _buildTurfList(),
     );
   }
 
+  Widget _buildDrawer() {
+    return Drawer(
+      backgroundColor: DesignSystem.backgroundWhite,
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            decoration: BoxDecoration(
+              color: DesignSystem.primaryIndigo,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                  radius: 30,
+                  backgroundColor: DesignSystem.textWhite,
+                  child: Icon(
+                    Icons.admin_panel_settings,
+                    color: DesignSystem.primaryIndigo,
+                    size: DesignSystem.iconLarge,
+                  ),
+                ),
+                DesignSystem.gap12,
+                Text(
+                  'Admin Panel',
+                  style: DesignSystem.headline4.copyWith(color: DesignSystem.textWhite),
+                ),
+                DesignSystem.gap4,
+                Text(
+                  'Manage your turf business',
+                  style: DesignSystem.bodySmall.copyWith(color: DesignSystem.textWhite.withValues(alpha: 0.8)),
+                ),
+              ],
+            ),
+          ),
+          ListTile(
+            leading: Icon(Icons.dashboard, color: DesignSystem.primaryIndigo),
+            title: Text('Dashboard', style: DesignSystem.bodyLarge),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.location_city, color: DesignSystem.primaryIndigo),
+            title: Text('Manage Turfs', style: DesignSystem.bodyLarge),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AdminManageTurfsScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.person, color: DesignSystem.primaryIndigo),
+            title: Text('Profile', style: DesignSystem.bodyLarge),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AdminProfileScreen()),
+              );
+            },
+          ),
+          Divider(),
+          ListTile(
+            leading: Icon(Icons.logout, color: DesignSystem.error),
+            title: Text('Logout', style: DesignSystem.bodyLarge.copyWith(color: DesignSystem.error)),
+            onTap: () {
+              Navigator.pop(context);
+              ref.read(authControllerProvider.notifier).logout();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Padding(
+        padding: DesignSystem.paddingAll24,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: DesignSystem.paddingAll16,
+              decoration: DesignSystem.whiteCardDecoration,
+              child: Icon(
+                Icons.error_outline,
+                size: DesignSystem.iconXLarge,
+                color: DesignSystem.error,
+              ),
+            ),
+            DesignSystem.gap16,
+            Text(
+              _errorMessage!,
+              style: DesignSystem.bodyMedium.copyWith(color: DesignSystem.textSecondary),
+              textAlign: TextAlign.center,
+            ),
+            DesignSystem.gap24,
+            ElevatedButton(
+              onPressed: _fetchTurfs,
+              child: Text("Retry"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildEmptyState() {
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: DesignSystem.paddingAll24,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -203,22 +314,17 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
               children: [
                 Text(
                   "Welcome, Admin!",
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: DesignSystem.headline2.copyWith(color: DesignSystem.textPrimary),
                 ),
-                SizedBox(height: 8),
+                DesignSystem.gap8,
                 Text(
                   "Let's set up your turf business",
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Colors.white70,
-                  ),
+                  style: DesignSystem.bodyLarge.copyWith(color: DesignSystem.textSecondary),
                 ),
               ],
             ),
 
-            SizedBox(height: 60),
+            DesignSystem.gap64,
 
             Expanded(
               child: Center(
@@ -229,24 +335,24 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
                       width: 200,
                       height: 200,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
+                        color: DesignSystem.overlayLight,
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         Icons.sports_soccer,
                         size: 100,
-                        color: Colors.white,
+                        color: DesignSystem.primaryIndigo,
                       ),
                     ),
-                    SizedBox(height: 40),
+                    DesignSystem.gap40,
                     Text(
                       "Get Started in 3 Simple Steps",
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
+                      style: DesignSystem.headline4.copyWith(
+                        color: DesignSystem.textPrimary,
+                        fontWeight: DesignSystem.fontWeightSemiBold,
                       ),
                     ),
-                    SizedBox(height: 16),
+                    DesignSystem.gap16,
                     _buildStepItem(1, "Add Turf Details"),
                     _buildStepItem(2, "Upload Photos"),
                     _buildStepItem(3, "Configure Sports & Courts"),
@@ -255,11 +361,11 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
               ),
             ),
 
-            SizedBox(height: 24),
+            DesignSystem.gap24,
 
             SizedBox(
               width: double.infinity,
-              height: 56,
+              height: DesignSystem.spacing56,
               child: ElevatedButton(
                 onPressed: () async {
                   await Navigator.push(
@@ -271,18 +377,13 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
                   _fetchTurfs();
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: AppTheme.purplePrimary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
+                  backgroundColor: DesignSystem.primaryIndigo,
+                  foregroundColor: DesignSystem.textWhite,
+                  shape: DesignSystem.buttonShape,
                 ),
                 child: Text(
                   "Add Your First Turf",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: DesignSystem.button,
                 ),
               ),
             ),
@@ -293,135 +394,138 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
   }
 
   Widget _buildTurfList() {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: _turfs.length,
-      itemBuilder: (context, index) {
-        final turf = _turfs[index];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        turf['name'] ?? 'Unnamed Turf',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: ListView.builder(
+        padding: DesignSystem.paddingAll16,
+        itemCount: _turfs.length,
+        itemBuilder: (context, index) {
+          final turf = _turfs[index];
+          return Container(
+            margin: DesignSystem.marginBottom16,
+            decoration: DesignSystem.cardDecoration,
+            child: Padding(
+              padding: DesignSystem.paddingAll16,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          turf['name'] ?? 'Unnamed Turf',
+                          style: DesignSystem.headline4,
                         ),
                       ),
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.edit, color: DesignSystem.primaryIndigo),
+                            onPressed: () async {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => EditTurfScreen(turf: turf),
+                                ),
+                              );
+                              _fetchTurfs();
+                            },
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.delete, color: DesignSystem.error),
+                            onPressed: () => _deleteTurf(turf['id']),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  DesignSystem.gap8,
+                  Text(
+                    turf['location'] ?? 'No location set',
+                    style: DesignSystem.bodySmall.copyWith(color: DesignSystem.textSecondary),
+                  ),
+                  DesignSystem.gap4,
+                  Text(
+                    'Price: ₹${turf['price_per_hour'] ?? 0}/hour',
+                    style: DesignSystem.bodyMedium.copyWith(
+                      fontWeight: DesignSystem.fontWeightSemiBold,
+                      color: DesignSystem.primaryIndigo,
                     ),
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.edit, color: AppTheme.purplePrimary),
-                          onPressed: () async {
-                            await Navigator.push(
+                  ),
+                  DesignSystem.gap12,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildStatCard(
+                        icon: Icons.sports_tennis,
+                        label: 'Sports',
+                        value: '3',
+                      ),
+                      _buildStatCard(
+                        icon: Icons.sports_soccer,
+                        label: 'Courts',
+                        value: '5',
+                      ),
+                      _buildStatCard(
+                        icon: Icons.calendar_today,
+                        label: 'Bookings',
+                        value: '12',
+                      ),
+                    ],
+                  ),
+                  DesignSystem.gap12,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => EditTurfScreen(turf: turf),
+                                builder: (_) => SportListScreen(turf: turf),
                               ),
                             );
-                            _fetchTurfs();
                           },
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: DesignSystem.primaryIndigo, width: 2),
+                            shape: DesignSystem.buttonShape,
+                          ),
+                          child: Text("Manage Sports"),
                         ),
-                        IconButton(
-                          icon: Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => _deleteTurf(turf['id']),
+                      ),
+                      DesignSystem.gap8,
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            // Navigate to view bookings (to be implemented)
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Bookings feature coming soon!"),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: DesignSystem.primaryIndigo,
+                            shape: DesignSystem.buttonShape,
+                          ),
+                          child: Text("View Bookings"),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-                SizedBox(height: 8),
-                Text(
-                  turf['location'] ?? 'No location set',
-                  style: const TextStyle(color: Colors.grey),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'Price: ₹${turf['price_per_hour'] ?? 0}/hour',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.purplePrimary,
+                      ),
+                    ],
                   ),
-                ),
-                SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildStatCard(
-                      icon: Icons.sports_tennis,
-                      label: 'Sports',
-                      value: '3',
-                    ),
-                    _buildStatCard(
-                      icon: Icons.sports_tennis,
-                      label: 'Courts',
-                      value: '5',
-                    ),
-                    _buildStatCard(
-                      icon: Icons.calendar_today,
-                      label: 'Bookings',
-                      value: '12',
-                    ),
-                  ],
-                ),
-                SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => SportListScreen(turf: turf),
-                            ),
-                          );
-                        },
-                        child: Text("Manage Sports"),
-                      ),
-                    ),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // Navigate to view bookings (to be implemented)
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Bookings feature coming soon!"),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.purplePrimary,
-                        ),
-                        child: Text("View Bookings"),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
   Widget _buildStepItem(int number, String text) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: DesignSystem.paddingVertical8,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -429,26 +533,20 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
             width: 30,
             height: 30,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: DesignSystem.primaryIndigo,
               shape: BoxShape.circle,
             ),
             child: Center(
               child: Text(
                 number.toString(),
-                style: TextStyle(
-                  color: AppTheme.purplePrimary,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: DesignSystem.button.copyWith(color: DesignSystem.textWhite),
               ),
             ),
           ),
-          SizedBox(width: 16),
+          DesignSystem.gap16,
           Text(
             text,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-            ),
+            style: DesignSystem.bodyLarge.copyWith(color: DesignSystem.textPrimary),
           ),
         ],
       ),
@@ -461,25 +559,25 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
     required String value,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: DesignSystem.paddingAll12,
       decoration: BoxDecoration(
-        color: AppTheme.purpleLight,
-        borderRadius: BorderRadius.circular(8),
+        color: DesignSystem.backgroundLight,
+        borderRadius: DesignSystem.borderRadiusMedium,
       ),
       child: Column(
         children: [
-          Icon(icon, size: 20, color: AppTheme.purplePrimary),
-          SizedBox(height: 4),
+          Icon(icon, size: DesignSystem.iconMedium, color: DesignSystem.primaryIndigo),
+          DesignSystem.gap4,
           Text(
             value,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: AppTheme.purplePrimary,
+            style: DesignSystem.bodyMedium.copyWith(
+              fontWeight: DesignSystem.fontWeightBold,
+              color: DesignSystem.primaryIndigo,
             ),
           ),
           Text(
             label,
-            style: const TextStyle(fontSize: 10),
+            style: DesignSystem.caption,
           ),
         ],
       ),

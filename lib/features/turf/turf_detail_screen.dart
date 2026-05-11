@@ -48,136 +48,123 @@ class _TurfDetailScreenState extends ConsumerState<TurfDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_currentTurf['name'] ?? 'Turf Details'),
-        backgroundColor: AppTheme.purplePrimary,
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh),
             onPressed: _refreshTurfData,
           ),
         ],
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
-        onRefresh: _refreshTurfData,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                height: 200,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(16),
-                  image: _currentTurf['image_url'] != null &&
-                      _currentTurf['image_url'].toString().isNotEmpty
-                      ? DecorationImage(
-                    image: NetworkImage(_currentTurf['image_url']),
-                    fit: BoxFit.cover,
-                  )
-                      : null,
-                ),
-                child: _currentTurf['image_url'] == null ||
-                    _currentTurf['image_url'].toString().isEmpty
-                    ? Center(
-                  child: Icon(
-                    Icons.sports_soccer,
-                    size: 80,
-                    color: Colors.grey,
-                  ),
-                )
-                    : null,
-              ),
-
-              SizedBox(height: 16),
-
-              Text(
-                _currentTurf['name'] ?? '',
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              SizedBox(height: 8),
-
-              Row(
-                children: [
-                  Icon(Icons.location_on, color: Colors.grey, size: 20),
-                  SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      _currentTurf['location'] ?? '',
-                      style: const TextStyle(fontSize: 16, color: Colors.grey),
-                    ),
-                  ),
-                ],
-              ),
-
-              if (_currentTurf['description'] != null &&
-                  _currentTurf['description'].toString().isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Text(
-                    _currentTurf['description'],
-                    style: const TextStyle(fontSize: 14),
-                  ),
-                ),
-
-              SizedBox(height: 16),
-
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: AppTheme.purpleLight,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  '₹${_currentTurf['price_per_hour'] ?? 0}/hour',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.purplePrimary,
-                  ),
-                ),
-              ),
-
-              SizedBox(height: 24),
-
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => UserSportListScreen(turf: _currentTurf),
+              onRefresh: _refreshTurfData,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        height: 220,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: DesignSystem.backgroundWhite,
+                          boxShadow: DesignSystem.shadowMedium,
+                        ),
+                        child: _currentTurf['image_url'] != null &&
+                                _currentTurf['image_url'].toString().isNotEmpty
+                            ? Image.network(
+                                _currentTurf['image_url'],
+                                fit: BoxFit.cover,
+                              )
+                            : Center(
+                                child: Icon(
+                                  Icons.sports_soccer,
+                                  size: 80,
+                                  color: Colors.grey.shade500,
+                                ),
+                              ),
                       ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.purplePrimary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
                     ),
-                  ),
-                  child: Text(
-                    "Select Sport",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                    const SizedBox(height: 20),
+                    Text(
+                      _currentTurf['name'] ?? '',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
                     ),
-                  ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        const Icon(Icons.location_on, color: Colors.grey, size: 20),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            _currentTurf['location'] ?? '',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(color: Colors.grey.shade700),
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (_currentTurf['description'] != null &&
+                        _currentTurf['description'].toString().isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: DesignSystem.backgroundWhite,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: DesignSystem.shadowSmall,
+                        ),
+                        child: Text(
+                          _currentTurf['description'],
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 20),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      decoration: BoxDecoration(
+                        color: DesignSystem.backgroundWhite,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: DesignSystem.shadowSmall,
+                      ),
+                      child: Text(
+                        '₹${_currentTurf['price_per_hour'] ?? 0}/hour',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              color: DesignSystem.primaryIndigo,
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => UserSportListScreen(turf: _currentTurf),
+                            ),
+                          );
+                        },
+                        child: const Text('Select Sport'),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 }

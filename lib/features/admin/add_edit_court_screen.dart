@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/api/api_client.dart';
-import '../../core/theme/app_theme.dart';
+import '../../core/theme/design_system.dart';
 
 class AddEditCourtScreen extends StatefulWidget {
   final int sportId;
@@ -124,12 +124,15 @@ class _AddEditCourtScreenState extends State<AddEditCourtScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: DesignSystem.backgroundLavender,
       appBar: AppBar(
         title: Text(widget.court == null ? 'Add Court' : 'Edit Court'),
-        backgroundColor: AppTheme.purplePrimary,
+        backgroundColor: DesignSystem.primaryIndigo,
+        foregroundColor: DesignSystem.textWhite,
+        elevation: DesignSystem.elevation0,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: DesignSystem.paddingAll16,
         child: Form(
           key: _formKey,
           child: Column(
@@ -148,7 +151,7 @@ class _AddEditCourtScreenState extends State<AddEditCourtScreen> {
                   return null;
                 },
               ),
-              SizedBox(height: 16),
+              DesignSystem.gap16,
 
               TextFormField(
                 controller: _priceController,
@@ -168,7 +171,7 @@ class _AddEditCourtScreenState extends State<AddEditCourtScreen> {
                   return null;
                 },
               ),
-              SizedBox(height: 16),
+              DesignSystem.gap16,
 
               DropdownButtonFormField<String>(
                 initialValue: _slotType,
@@ -186,13 +189,13 @@ class _AddEditCourtScreenState extends State<AddEditCourtScreen> {
                   });
                 },
               ),
-              SizedBox(height: 24),
+              DesignSystem.gap16,
 
               Text(
                 'Morning Session',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: DesignSystem.headline5,
               ),
-              SizedBox(height: 8),
+              DesignSystem.gap8,
 
               ListTile(
                 title: Text('Start Time'),
@@ -210,13 +213,13 @@ class _AddEditCourtScreenState extends State<AddEditCourtScreen> {
                   setState(() => _morningEnd = time);
                 }),
               ),
-              SizedBox(height: 16),
+              DesignSystem.gap16,
 
               Text(
                 'Evening Session',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: DesignSystem.headline5,
               ),
-              SizedBox(height: 8),
+              DesignSystem.gap8,
 
               ListTile(
                 title: Text('Start Time'),
@@ -234,27 +237,24 @@ class _AddEditCourtScreenState extends State<AddEditCourtScreen> {
                   setState(() => _eveningEnd = time);
                 }),
               ),
-              SizedBox(height: 24),
+              DesignSystem.gap24,
 
               _isLoading
-                  ? const CircularProgressIndicator()
+                  ? CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(DesignSystem.primaryIndigo),
+              )
                   : SizedBox(
                 width: double.infinity,
-                height: 56,
+                height: DesignSystem.spacing56,
                 child: ElevatedButton(
                   onPressed: _save,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.purplePrimary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
+                    backgroundColor: DesignSystem.primaryIndigo,
+                    shape: DesignSystem.buttonShape,
                   ),
                   child: Text(
-                    widget.court == null ? 'Create Court' : 'Update Court',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    widget.court == null ? 'Add Court' : 'Update Court',
+                    style: DesignSystem.button,
                   ),
                 ),
               ),

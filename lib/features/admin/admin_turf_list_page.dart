@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/api/api_client.dart';
+import '../../core/theme/app_theme.dart';
 import 'add_turf_page.dart';
 
 class AdminTurfListScreen extends StatefulWidget {
@@ -48,8 +49,10 @@ class _AdminTurfListScreenState extends State<AdminTurfListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.purpleBackground,
       appBar: AppBar(
-        title: Text('My Turfs'),
+        title: const Text('My Turfs'),
+        backgroundColor: AppTheme.purplePrimary,
         actions: [
           IconButton(
             icon: Icon(Icons.add),
@@ -86,11 +89,22 @@ class _AdminTurfListScreenState extends State<AdminTurfListScreen> {
               final turf = turfs[index];
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                elevation: 2,
                 child: ListTile(
-                  title: Text(turf['name'] ?? ''),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  tileColor: AppTheme.purpleLight,
+                  title: Text(
+                    turf['name'] ?? '',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   subtitle: Text("${turf['location'] ?? ''} • ₹${turf['price_per_hour'] ?? 0}"),
                   trailing: IconButton(
-                    icon: Icon(Icons.delete, color: Colors.red),
+                    icon: const Icon(Icons.delete, color: Colors.red),
                     onPressed: () => _deleteTurf(turf['id']),
                   ),
                   onTap: () {

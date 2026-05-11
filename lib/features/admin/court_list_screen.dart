@@ -101,6 +101,7 @@ class _CourtListScreenState extends ConsumerState<CourtListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.purpleBackground,
       appBar: AppBar(
         title: Text("${widget.sport['name']} Courts"),
         backgroundColor: AppTheme.purplePrimary,
@@ -138,8 +139,11 @@ class _CourtListScreenState extends ConsumerState<CourtListScreen> {
               onPressed: _fetchCourts,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.purplePrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
               ),
-              child: Text("Retry"),
+              child: const Text("Retry"),
             ),
           ],
         ),
@@ -164,8 +168,11 @@ class _CourtListScreenState extends ConsumerState<CourtListScreen> {
                     onPressed: _fetchCourts,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.purplePrimary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
-                    child: Text("Retry"),
+                    child: const Text("Retry"),
                   ),
                 ],
               ),
@@ -232,6 +239,7 @@ class _CourtListScreenState extends ConsumerState<CourtListScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
+                elevation: 2,
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(

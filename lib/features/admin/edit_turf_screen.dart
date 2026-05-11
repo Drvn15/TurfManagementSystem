@@ -46,6 +46,19 @@ class _EditTurfScreenState extends State<EditTurfScreen> {
   Future<void> _updateTurf() async {
     if (!_formKey.currentState!.validate()) return;
 
+    final priceText = _priceController.text.trim();
+    final price = int.tryParse(priceText);
+    if (price == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please enter a valid price."),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     try {
@@ -54,7 +67,7 @@ class _EditTurfScreenState extends State<EditTurfScreen> {
         body: {
           "name": _nameController.text.trim(),
           "location": _locationController.text.trim(),
-          "price_per_hour": int.parse(_priceController.text.trim()),
+          "price_per_hour": price,
           "description": _descriptionController.text.trim(),
           "image_url": widget.turf['image_url'] ?? '',
         },
@@ -86,8 +99,9 @@ class _EditTurfScreenState extends State<EditTurfScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.purpleBackground,
       appBar: AppBar(
-        title: Text("Edit Turf"),
+        title: const Text("Edit Turf"),
         backgroundColor: AppTheme.purplePrimary,
       ),
       body: SingleChildScrollView(

@@ -58,13 +58,12 @@ class _UserCourtListScreenState extends ConsumerState<UserCourtListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('${widget.sport['name']} Courts'),
-        backgroundColor: AppTheme.purplePrimary,
       ),
       body: FutureBuilder<List<dynamic>>(
         future: _courtsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (snapshot.hasError || _errorMessage != null) {
@@ -72,22 +71,22 @@ class _UserCourtListScreenState extends ConsumerState<UserCourtListScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  SizedBox(height: 16),
+                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                  const SizedBox(height: 16),
                   Text(
                     'Error loading courts',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
                     _errorMessage ?? snapshot.error.toString(),
                     textAlign: TextAlign.center,
                     style: const TextStyle(color: Colors.grey),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: _fetchCourts,
-                    child: Text('Retry'),
+                    child: const Text('Retry'),
                   ),
                 ],
               ),
@@ -101,16 +100,17 @@ class _UserCourtListScreenState extends ConsumerState<UserCourtListScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.sports_tennis, size: 64, color: Colors.grey),
-                  SizedBox(height: 16),
+                  const Icon(Icons.sports_tennis, size: 64, color: Colors.grey),
+                  const SizedBox(height: 16),
                   Text(
                     'No courts available',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  SizedBox(height: 8),
-                  Text(
+                  const SizedBox(height: 8),
+                  const Text(
                     'This sport hasn\'t been configured with courts yet',
                     style: TextStyle(color: Colors.grey),
+                    textAlign: TextAlign.center,
                   ),
                 ],
               ),
@@ -127,6 +127,7 @@ class _UserCourtListScreenState extends ConsumerState<UserCourtListScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
+                elevation: 2,
                 child: InkWell(
                   onTap: () {
                     Navigator.push(
@@ -149,11 +150,13 @@ class _UserCourtListScreenState extends ConsumerState<UserCourtListScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              court['name'] ?? 'Court',
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                            Expanded(
+                              child: Text(
+                                court['name'] ?? 'Court',
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                             Container(
@@ -162,27 +165,24 @@ class _UserCourtListScreenState extends ConsumerState<UserCourtListScreen> {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: AppTheme.purpleLight,
+                                color: DesignSystem.backgroundLight,
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
                                 '₹${court['price'] ?? 0}',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: AppTheme.purplePrimary,
+                                  color: DesignSystem.primaryIndigo,
                                 ),
                               ),
                             ),
                           ],
                         ),
-                        SizedBox(height: 12),
+                        const SizedBox(height: 12),
                         Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
                                 color: Colors.grey.shade100,
                                 borderRadius: BorderRadius.circular(4),
@@ -195,16 +195,16 @@ class _UserCourtListScreenState extends ConsumerState<UserCourtListScreen> {
                                 ),
                               ),
                             ),
-                            SizedBox(width: 8),
-                            Icon(Icons.access_time, size: 16, color: Colors.grey),
-                            SizedBox(width: 4),
+                            const SizedBox(width: 8),
+                            const Icon(Icons.access_time, size: 16, color: Colors.grey),
+                            const SizedBox(width: 4),
                             Text(
                               '${_formatTime(court['morning_start'])} - ${_formatTime(court['morning_end'])}',
                               style: const TextStyle(fontSize: 12, color: Colors.grey),
                             ),
                           ],
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Padding(
                           padding: const EdgeInsets.only(left: 24),
                           child: Text(

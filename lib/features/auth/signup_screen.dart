@@ -16,7 +16,7 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  static const Color _background = Color(0xFFF7F6F3);
+  static const Color _background = DesignSystem.backgroundLavender;
   static const Color _textSecondary = Color(0xFF5A5A5A);
   static const Color _accent = Colors.black;
   static const Color _softBorder = Color(0xFFE3DED8);

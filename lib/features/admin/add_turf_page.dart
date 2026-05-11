@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/api/api_client.dart';
+import '../../core/theme/app_theme.dart';
 
 class AddTurfScreen extends StatefulWidget {
   const AddTurfScreen({super.key});
@@ -18,16 +19,33 @@ class _AddTurfScreenState extends State<AddTurfScreen> {
   final ApiClient _api = ApiClient();
 
   Future<void> saveTurf() async {
+    final name = nameCtrl.text.trim();
+    final location = locationCtrl.text.trim();
+    final priceText = priceCtrl.text.trim();
+    final imageUrl = imageCtrl.text.trim();
+    final price = int.tryParse(priceText);
+
+    if (name.isEmpty || location.isEmpty || price == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please enter valid turf details before saving."),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     setState(() => isLoading = true);
 
     try {
       await _api.post(
         "/turfs",
         body: {
-          "name": nameCtrl.text.trim(),
-          "location": locationCtrl.text.trim(),
-          "price_per_hour": int.parse(priceCtrl.text.trim()),
-          "image_url": imageCtrl.text.trim(),
+          "name": name,
+          "location": location,
+          "price_per_hour": price,
+          "image_url": imageUrl,
         },
       );
 
@@ -36,7 +54,10 @@ class _AddTurfScreenState extends State<AddTurfScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to create turf: ${e.toString()}")),
+        SnackBar(
+          content: Text("Failed to create turf: ${e.toString()}"),
+          backgroundColor: Colors.red,
+        ),
       );
     } finally {
       setState(() => isLoading = false);
@@ -46,7 +67,8 @@ class _AddTurfScreenState extends State<AddTurfScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Add Turf')),
+      backgroundColor: AppTheme.purpleBackground,
+      appBar: AppBar(title: const Text('Add Turf'), backgroundColor: AppTheme.purplePrimary),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: SingleChildScrollView(
@@ -75,9 +97,19 @@ class _AddTurfScreenState extends State<AddTurfScreen> {
               SizedBox(height: 24),
               isLoading
                   ? const CircularProgressIndicator()
-                  : ElevatedButton(
-                onPressed: saveTurf,
-                child: Text('Save Turf'),
+                  : SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: saveTurf,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.purplePrimary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: const Text('Save Turf'),
+                ),
               ),
             ],
           ),

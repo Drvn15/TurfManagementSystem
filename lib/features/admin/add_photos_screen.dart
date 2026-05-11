@@ -1,7 +1,6 @@
 import 'dart:io'; // Make sure you have this import for File
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../core/api/api_client.dart';
 import '../../core/theme/app_theme.dart';
 import 'add_sports_courts_screen.dart';
 
@@ -18,7 +17,6 @@ class _AddPhotosScreenState extends State<AddPhotosScreen> {
   final List<XFile?> _selectedImages = List.filled(4, null);
   final ImagePicker _picker = ImagePicker();
   bool _isUploading = false;
-  final ApiClient _api = ApiClient();
 
   Future<void> _pickImage(int index) async {
     final XFile? image = await _picker.pickImage(
@@ -110,8 +108,9 @@ class _AddPhotosScreenState extends State<AddPhotosScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.purpleBackground,
       appBar: AppBar(
-        title: Text("Add Photos"),
+        title: const Text("Add Photos"),
         backgroundColor: AppTheme.purplePrimary,
       ),
       body: Padding(
@@ -239,7 +238,7 @@ class _AddPhotosScreenState extends State<AddPhotosScreen> {
               width: double.infinity,
               height: 56,
               child: _isUploading
-                  ? Center(child: CircularProgressIndicator())
+                  ? const Center(child: CircularProgressIndicator())
                   : ElevatedButton(
                 onPressed: _uploadImagesAndContinue,
                 style: ElevatedButton.styleFrom(
@@ -248,7 +247,7 @@ class _AddPhotosScreenState extends State<AddPhotosScreen> {
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                child: Text(
+                child: const Text(
                   "Next →",
                   style: TextStyle(
                     fontSize: 18,

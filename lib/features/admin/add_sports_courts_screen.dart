@@ -204,8 +204,6 @@ class _AddSportsCourtsScreenState extends State<AddSportsCourtsScreen> {
     try {
       // For each selected sport, create it and then create courts
       for (var sport in _selectedSports) {
-        print("📝 Creating sport: ${sport['name']}");
-
         // Create sport
         final sportResponse = await _api.post(
           "/sports",
@@ -220,15 +218,12 @@ class _AddSportsCourtsScreenState extends State<AddSportsCourtsScreen> {
         }
 
         final sportId = sportResponse['id'];
-        print("✅ Sport created with ID: $sportId");
 
         // Create courts for this sport
         for (int i = 1; i <= sport['courtCount']; i++) {
           final courtName = sport['courtCount'] > 1
               ? "${sport['name']} Court $i"
               : sport['name'];
-
-          print("🏟️ Creating court: $courtName");
 
           final courtData = {
             "sport_id": sportId,
@@ -241,8 +236,6 @@ class _AddSportsCourtsScreenState extends State<AddSportsCourtsScreen> {
             "evening_end": _formatTimeOfDay(_eveningEnd),
           };
 
-          print("Court data: $courtData");
-
           final courtResponse = await _api.post(
             "/courts",
             body: courtData,
@@ -252,11 +245,8 @@ class _AddSportsCourtsScreenState extends State<AddSportsCourtsScreen> {
             throw Exception("Failed to create court: $courtName");
           }
 
-          print("✅ Court created successfully");
         }
       }
-
-      print("✅ All sports and courts created successfully!");
 
       if (!mounted) return;
 
@@ -264,13 +254,9 @@ class _AddSportsCourtsScreenState extends State<AddSportsCourtsScreen> {
       _showSuccessDialog();
 
     } catch (e) {
-      print("❌ ERROR: $e");
-
       String errorMessage = "Failed to save configuration";
 
       if (e is DioException) {
-        print("Status code: ${e.response?.statusCode}");
-        print("Response data: ${e.response?.data}");
 
         if (e.response?.data != null) {
           if (e.response?.data is Map) {
@@ -330,8 +316,9 @@ class _AddSportsCourtsScreenState extends State<AddSportsCourtsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.purpleBackground,
       appBar: AppBar(
-        title: Text("Configure Sports & Courts"),
+        title: const Text("Configure Sports & Courts"),
         backgroundColor: AppTheme.purplePrimary,
       ),
       body: Stack(
@@ -544,7 +531,7 @@ class _AddSportsCourtsScreenState extends State<AddSportsCourtsScreen> {
                                     color: AppTheme.purpleLight,
                                     borderRadius: BorderRadius.circular(12),
                                     border: Border.all(
-                                      color: AppTheme.purplePrimary.withOpacity(0.3),
+                                      color: const Color.fromRGBO(12, 14, 104, 0.3),
                                     ),
                                   ),
                                   child: Column(
@@ -729,7 +716,7 @@ class _AddSportsCourtsScreenState extends State<AddSportsCourtsScreen> {
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: const Color.fromRGBO(0, 0, 0, 0.05),
                     blurRadius: 10,
                     offset: const Offset(0, -5),
                   ),

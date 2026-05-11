@@ -79,6 +79,7 @@ class _AddEditSportScreenState extends State<AddEditSportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.purpleBackground,
       appBar: AppBar(
         title: Text(widget.sport == null ? 'Add Sport' : 'Edit Sport'),
         backgroundColor: AppTheme.purplePrimary,

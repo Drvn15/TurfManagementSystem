@@ -6,6 +6,7 @@ const sequelize = require("./models/db");
 const User = require("./models/User");
 const Turf = require("./models/Turf");
 const Booking = require("./models/Booking");
+const Court = require("./models/Court");
 
 // ---- Associations ----
 User.hasMany(Booking, {
@@ -13,8 +14,8 @@ User.hasMany(Booking, {
   onDelete: "CASCADE",
 });
 
-Turf.hasMany(Booking, {
-  foreignKey: "turf_id",
+Court.hasMany(Booking, {
+  foreignKey: "court_id",
   onDelete: "CASCADE",
 });
 
@@ -22,8 +23,8 @@ Booking.belongsTo(User, {
   foreignKey: "user_id",
 });
 
-Booking.belongsTo(Turf, {
-  foreignKey: "turf_id",
+Booking.belongsTo(Court, {
+  foreignKey: "court_id",
 });
 
 // ---- Server Boot ----
@@ -35,10 +36,10 @@ async function startServer() {
     console.log("Database connection established");
 
     // In development only.
-    // DO NOT use force: true in production.
-    await sequelize.sync({ alter: true });
-
-    console.log("Models synchronized");
+    // Only sync the Turf model here to fix the missing owner_id column
+    // without altering unrelated existing tables like court_sessions.
+    await Turf.sync({ alter: true });
+    console.log("Turf model synchronized");
 
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);

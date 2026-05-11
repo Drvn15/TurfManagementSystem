@@ -26,12 +26,12 @@ const Booking = sequelize.define(
     },
 
     start_time: {
-      type: DataTypes.TIME,
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
 
     end_time: {
-      type: DataTypes.TIME,
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
 
@@ -49,7 +49,7 @@ const Booking = sequelize.define(
     freezeTableName: true,
     indexes: [
       {
-        fields: ["turf_id", "date"],
+        fields: ["court_id", "date"],
       },
     ],
   }

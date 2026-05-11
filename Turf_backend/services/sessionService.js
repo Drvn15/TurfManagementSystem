@@ -1,4 +1,11 @@
-const { CourtSession } = require("../models");
+const CourtSession = require("../models/courtSession");
+const Court = require("../models/Court");
+
+function minutesToDbTime(minutes) {
+  const hh = String(Math.floor(minutes / 60)).padStart(2, "0");
+  const mm = String(minutes % 60).padStart(2, "0");
+  return `${hh}:${mm}:00`;
+}
 
 function validateSessionTime(session) {
   if (!session) return;
@@ -25,6 +32,11 @@ async function upsertSessions(courtId, { morning, evening }) {
   validateSessionTime(evening);
   validateNoOverlap(morning, evening);
 
+  const court = await Court.findByPk(courtId);
+  if (!court) {
+    throw new Error("Court not found");
+  }
+
   const operations = [];
 
   if (morning) {
@@ -47,6 +59,21 @@ async function upsertSessions(courtId, { morning, evening }) {
         end_time: evening.end
       })
     );
+  }
+
+  // Keep court table in sync because booking logic reads these fields.
+  const courtPatch = {};
+  if (morning) {
+    courtPatch.morning_start = minutesToDbTime(morning.start);
+    courtPatch.morning_end = minutesToDbTime(morning.end);
+  }
+  if (evening) {
+    courtPatch.evening_start = minutesToDbTime(evening.start);
+    courtPatch.evening_end = minutesToDbTime(evening.end);
+  }
+
+  if (Object.keys(courtPatch).length > 0) {
+    operations.push(court.update(courtPatch));
   }
 
   await Promise.all(operations);

@@ -138,14 +138,6 @@ class _AddTurfDetailsScreenState extends State<AddTurfDetailsScreen> {
     setState(() => _isLoading = true);
 
     try {
-      print("Sending to backend:");
-      print({
-        "name": _nameController.text.trim(),
-        "location": _selectedAddress,
-        "price_per_hour": int.parse(_priceController.text.trim()),
-        "image_url": "",
-      });
-
       final response = await _api.post(
         "/turfs",
         body: {
@@ -167,8 +159,6 @@ class _AddTurfDetailsScreenState extends State<AddTurfDetailsScreen> {
         ),
       );
     } catch (e) {
-      print("Error details: $e");
-
       String errorMessage = "Failed to create turf";
       if (e.toString().contains("400")) {
         errorMessage = "Server rejected the data. Check all fields.";
@@ -186,8 +176,9 @@ class _AddTurfDetailsScreenState extends State<AddTurfDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.purpleBackground,
       appBar: AppBar(
-        title: Text("Add Turf Details"),
+        title: const Text("Add Turf Details"),
         backgroundColor: AppTheme.purplePrimary,
       ),
       body: SingleChildScrollView(
@@ -298,8 +289,8 @@ class _AddTurfDetailsScreenState extends State<AddTurfDetailsScreen> {
                 child: FlutterMap(
                   mapController: _mapController,
                   options: MapOptions(
-                    center: _selectedLatLng ?? _defaultLocation,
-                    zoom: 13,
+                    initialCenter: _selectedLatLng ?? _defaultLocation,
+                    initialZoom: 13,
                     onTap: _onMapTap,
                   ),
                   children: [

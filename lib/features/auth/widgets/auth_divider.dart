@@ -7,12 +7,13 @@ class AuthDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = DesignSystem.paletteOf(context);
     return Row(
       children: [
         Expanded(
           child: Container(
             height: 1,
-            color: DesignSystem.glassBorder,
+            color: palette.glassBorder,
           ),
         ),
         Padding(
@@ -20,7 +21,7 @@ class AuthDivider extends StatelessWidget {
           child: Text(
             'OR',
             style: DesignSystem.bodyMedium.copyWith(
-              color: DesignSystem.textMuted,
+              color: palette.textMuted,
               fontWeight: DesignSystem.fontWeightMedium,
             ),
           ),
@@ -28,7 +29,7 @@ class AuthDivider extends StatelessWidget {
         Expanded(
           child: Container(
             height: 1,
-            color: DesignSystem.glassBorder,
+            color: palette.glassBorder,
           ),
         ),
       ],

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/design_system.dart';
 import '../../core/widgets/premium_widgets.dart';
+import '../../core/widgets/theme_toggle.dart';
 import 'widgets/auth_button.dart';
 import 'widgets/auth_divider.dart';
 import 'widgets/auth_header.dart';
@@ -51,6 +52,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = DesignSystem.paletteOf(context);
     return PremiumScaffold(
       body: SafeArea(
         child: Center(
@@ -62,14 +64,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      style: IconButton.styleFrom(
-                        backgroundColor: DesignSystem.surfaceGlass,
-                        foregroundColor: DesignSystem.textPrimary,
-                        side: const BorderSide(color: DesignSystem.glassBorder),
-                      ),
-                      icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          style: IconButton.styleFrom(
+                            backgroundColor: palette.surfaceGlass,
+                            foregroundColor: palette.textPrimary,
+                            side: BorderSide(color: palette.glassBorder),
+                          ),
+                          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+                        ),
+                        const Spacer(),
+                        const ThemeSceneToggle(),
+                      ],
                     ),
                     const SizedBox(height: DesignSystem.spacing20),
                     const AuthHeader(
@@ -171,14 +179,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         width: double.infinity,
                         padding: DesignSystem.paddingAll16,
                         decoration: BoxDecoration(
-                          color: DesignSystem.error.withValues(alpha: 0.12),
+                          color: palette.error.withValues(alpha: 0.12),
                           borderRadius: DesignSystem.borderRadiusLarge,
-                          border: Border.all(color: DesignSystem.error),
+                          border: Border.all(color: palette.error),
                         ),
                         child: Text(
                           'Passwords do not match yet.',
                           style: DesignSystem.bodyMedium.copyWith(
-                            color: DesignSystem.textPrimary,
+                            color: palette.textPrimary,
                           ),
                         ),
                       ),

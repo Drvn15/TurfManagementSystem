@@ -14,10 +14,13 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeControllerProvider);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Turf Booking',
-      theme: AppTheme.theme,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeMode,
       home: const SplashScreen(nextScreen: AuthGate()),
     );
   }
@@ -61,7 +64,8 @@ class _AuthGateState extends ConsumerState<AuthGate> {
       return Scaffold(
         body: Container(
           decoration: BoxDecoration(
-            gradient: DesignSystem.lavenderGradient,
+            gradient: Theme.of(context).extension<AppPalette>()?.backgroundGradient ??
+                DesignSystem.lavenderGradient,
           ),
           child: Center(
             child: Column(
@@ -69,13 +73,17 @@ class _AuthGateState extends ConsumerState<AuthGate> {
               children: [
                 CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    DesignSystem.primaryIndigo,
+                    Theme.of(context).extension<AppPalette>()?.primary ??
+                        DesignSystem.primaryIndigo,
                   ),
                 ),
                 SizedBox(height: DesignSystem.spacing24),
                 Text(
                   'Loading your session...',
-                  style: DesignSystem.bodyLarge,
+                  style: DesignSystem.bodyLarge.copyWith(
+                    color: Theme.of(context).extension<AppPalette>()?.textPrimary ??
+                        DesignSystem.textPrimary,
+                  ),
                 ),
               ],
             ),

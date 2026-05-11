@@ -28,7 +28,8 @@ class AuthInputField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = hasError ? DesignSystem.error : DesignSystem.glassBorder;
+    final palette = DesignSystem.paletteOf(context);
+    final borderColor = hasError ? palette.error : palette.glassBorder;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,7 +38,7 @@ class AuthInputField extends StatelessWidget {
           Text(
             labelText!,
             style: DesignSystem.bodyMedium.copyWith(
-              color: DesignSystem.textPrimary,
+              color: palette.textPrimary,
               fontWeight: DesignSystem.fontWeightSemiBold,
             ),
           ),
@@ -49,16 +50,16 @@ class AuthInputField extends StatelessWidget {
             filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
             child: Container(
               decoration: BoxDecoration(
-                color: DesignSystem.surfaceGlass,
+                color: palette.surfaceGlass,
                 borderRadius: DesignSystem.borderRadiusLarge,
                 border: Border.all(color: borderColor),
-                boxShadow: DesignSystem.shadowSmall,
+                boxShadow: DesignSystem.shadowSmallFor(context),
               ),
               child: TextField(
                 controller: controller,
                 keyboardType: keyboardType,
                 obscureText: obscureText,
-                style: DesignSystem.bodyLarge,
+                style: DesignSystem.bodyLarge.copyWith(color: palette.textPrimary),
                 decoration: InputDecoration(
                   hintText: hintText,
                   prefixIcon: Icon(prefixIcon),

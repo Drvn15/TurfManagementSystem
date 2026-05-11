@@ -16,13 +16,14 @@ class AuthToggleLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = DesignSystem.paletteOf(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
           prompt,
           style: DesignSystem.bodyMedium.copyWith(
-            color: DesignSystem.textSecondary,
+            color: palette.textSecondary,
           ),
         ),
         GestureDetector(
@@ -30,7 +31,7 @@ class AuthToggleLink extends StatelessWidget {
           child: Text(
             actionLabel,
             style: DesignSystem.bodyMedium.copyWith(
-              color: DesignSystem.accentLime,
+              color: palette.primary,
               fontWeight: DesignSystem.fontWeightSemiBold,
             ),
           ),

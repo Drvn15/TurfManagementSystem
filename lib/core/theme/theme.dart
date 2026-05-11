@@ -3,6 +3,7 @@ import 'design_system.dart';
 
 // Export must be at the top
 export 'design_system.dart';
+export 'theme_controller.dart';
 
 // This class provides backward compatibility with old code
 class AppTheme {
@@ -13,5 +14,7 @@ class AppTheme {
   static Color get purpleSecondary => DesignSystem.primaryIndigo;
 
   // Old theme getter
-  static ThemeData get theme => DesignSystem.theme;
+  static ThemeData get theme => DesignSystem.lightTheme;
+  static ThemeData get lightTheme => DesignSystem.lightTheme;
+  static ThemeData get darkTheme => DesignSystem.darkTheme;
 }

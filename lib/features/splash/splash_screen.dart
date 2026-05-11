@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:video_player/video_player.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -17,17 +18,29 @@ class _SplashScreenState extends State<SplashScreen> {
   late final VideoPlayerController _videoController;
   bool _isReady = false;
   bool _navigationStarted = false;
+  bool _controllerInitialized = false;
 
   @override
   void initState() {
     super.initState();
     _videoController = VideoPlayerController.asset('assets/Final.mp4');
+
+    // The bundled MP4 splash is not reliable on Flutter web, so we skip it
+    // there and move straight into the application flow.
+    if (kIsWeb) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _goToNextScreen();
+      });
+      return;
+    }
+
     _initializeVideo();
   }
 
   Future<void> _initializeVideo() async {
     try {
-      await _videoController.initialize();
+      await _videoController.initialize().timeout(const Duration(seconds: 3));
+      _controllerInitialized = true;
       await _videoController.setLooping(false);
       await _videoController.play();
 
@@ -85,7 +98,9 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   void dispose() {
-    _videoController.removeListener(_handleVideoProgress);
+    if (_controllerInitialized) {
+      _videoController.removeListener(_handleVideoProgress);
+    }
     _videoController.dispose();
     super.dispose();
   }

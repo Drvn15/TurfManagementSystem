@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
 import '../../core/theme/design_system.dart';
 import '../../core/widgets/premium_widgets.dart';
+import '../../core/widgets/theme_toggle.dart';
 import '../auth/auth_controller.dart';
 import 'add_turf_details_screen.dart';
 import 'admin_manage_turfs_screen.dart';
@@ -123,10 +124,15 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard>
 
   @override
   Widget build(BuildContext context) {
+    final palette = DesignSystem.paletteOf(context);
     return PremiumScaffold(
       appBar: AppBar(
         title: const Text("Admin Dashboard"),
         actions: [
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 6),
+            child: ThemeSceneToggle(compact: true),
+          ),
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
             onPressed: _fetchTurfs,
@@ -172,7 +178,13 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard>
         padding: EdgeInsets.zero,
         children: [
           const DrawerHeader(
-            decoration: BoxDecoration(gradient: DesignSystem.heroGradient),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFFEAE5FF), Color(0xFFD6CFFF), Color(0xFFC6BCFF)],
+              ),
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -181,7 +193,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard>
                   backgroundColor: DesignSystem.surfaceElevated,
                   child: Icon(
                     Icons.admin_panel_settings_rounded,
-                    color: DesignSystem.accentLime,
+                    color: DesignSystem.primaryIndigo,
                     size: 28,
                   ),
                 ),
@@ -196,12 +208,12 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard>
             ),
           ),
           ListTile(
-            leading: const Icon(Icons.dashboard_rounded, color: DesignSystem.accentLime),
+            leading: Icon(Icons.dashboard_rounded, color: palette.primary),
             title: Text('Dashboard', style: DesignSystem.bodyLarge),
             onTap: () => Navigator.pop(context),
           ),
           ListTile(
-            leading: const Icon(Icons.location_city_rounded, color: DesignSystem.accentLime),
+            leading: Icon(Icons.location_city_rounded, color: palette.primary),
             title: Text('Manage Turfs', style: DesignSystem.bodyLarge),
             onTap: () {
               Navigator.pop(context);
@@ -212,7 +224,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard>
             },
           ),
           ListTile(
-            leading: const Icon(Icons.person_rounded, color: DesignSystem.accentLime),
+            leading: Icon(Icons.person_rounded, color: palette.primary),
             title: Text('Profile', style: DesignSystem.bodyLarge),
             onTap: () {
               Navigator.pop(context);

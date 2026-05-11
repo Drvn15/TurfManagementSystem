@@ -18,6 +18,7 @@ class SocialLoginButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = DesignSystem.paletteOf(context);
     return SizedBox(
       width: double.infinity,
       height: DesignSystem.spacing56,
@@ -27,13 +28,13 @@ class SocialLoginButton extends StatelessWidget {
         label: Text(
           label,
           style: DesignSystem.bodyMedium.copyWith(
-            color: DesignSystem.textPrimary,
+            color: palette.textPrimary,
             fontWeight: DesignSystem.fontWeightSemiBold,
           ),
         ),
         style: OutlinedButton.styleFrom(
-          backgroundColor: DesignSystem.surfaceGlass,
-          side: const BorderSide(color: DesignSystem.glassBorder),
+          backgroundColor: palette.surfaceGlass,
+          side: BorderSide(color: palette.glassBorder),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(DesignSystem.radiusLarge),
           ),

@@ -1,95 +1,280 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+@immutable
+class AppPalette extends ThemeExtension<AppPalette> {
+  const AppPalette({
+    required this.backgroundBase,
+    required this.backgroundSecondary,
+    required this.surfaceGlass,
+    required this.surfaceElevated,
+    required this.primary,
+    required this.primarySoft,
+    required this.accent,
+    required this.textPrimary,
+    required this.textSecondary,
+    required this.textMuted,
+    required this.border,
+    required this.glassBorder,
+    required this.glassShadow,
+    required this.overlaySoft,
+    required this.overlayStrong,
+    required this.success,
+    required this.error,
+    required this.warning,
+    required this.heroGradient,
+    required this.backgroundGradient,
+    required this.primaryGradient,
+    required this.glassGradient,
+  });
+
+  final Color backgroundBase;
+  final Color backgroundSecondary;
+  final Color surfaceGlass;
+  final Color surfaceElevated;
+  final Color primary;
+  final Color primarySoft;
+  final Color accent;
+  final Color textPrimary;
+  final Color textSecondary;
+  final Color textMuted;
+  final Color border;
+  final Color glassBorder;
+  final Color glassShadow;
+  final Color overlaySoft;
+  final Color overlayStrong;
+  final Color success;
+  final Color error;
+  final Color warning;
+  final LinearGradient heroGradient;
+  final LinearGradient backgroundGradient;
+  final LinearGradient primaryGradient;
+  final LinearGradient glassGradient;
+
+  @override
+  AppPalette copyWith({
+    Color? backgroundBase,
+    Color? backgroundSecondary,
+    Color? surfaceGlass,
+    Color? surfaceElevated,
+    Color? primary,
+    Color? primarySoft,
+    Color? accent,
+    Color? textPrimary,
+    Color? textSecondary,
+    Color? textMuted,
+    Color? border,
+    Color? glassBorder,
+    Color? glassShadow,
+    Color? overlaySoft,
+    Color? overlayStrong,
+    Color? success,
+    Color? error,
+    Color? warning,
+    LinearGradient? heroGradient,
+    LinearGradient? backgroundGradient,
+    LinearGradient? primaryGradient,
+    LinearGradient? glassGradient,
+  }) {
+    return AppPalette(
+      backgroundBase: backgroundBase ?? this.backgroundBase,
+      backgroundSecondary: backgroundSecondary ?? this.backgroundSecondary,
+      surfaceGlass: surfaceGlass ?? this.surfaceGlass,
+      surfaceElevated: surfaceElevated ?? this.surfaceElevated,
+      primary: primary ?? this.primary,
+      primarySoft: primarySoft ?? this.primarySoft,
+      accent: accent ?? this.accent,
+      textPrimary: textPrimary ?? this.textPrimary,
+      textSecondary: textSecondary ?? this.textSecondary,
+      textMuted: textMuted ?? this.textMuted,
+      border: border ?? this.border,
+      glassBorder: glassBorder ?? this.glassBorder,
+      glassShadow: glassShadow ?? this.glassShadow,
+      overlaySoft: overlaySoft ?? this.overlaySoft,
+      overlayStrong: overlayStrong ?? this.overlayStrong,
+      success: success ?? this.success,
+      error: error ?? this.error,
+      warning: warning ?? this.warning,
+      heroGradient: heroGradient ?? this.heroGradient,
+      backgroundGradient: backgroundGradient ?? this.backgroundGradient,
+      primaryGradient: primaryGradient ?? this.primaryGradient,
+      glassGradient: glassGradient ?? this.glassGradient,
+    );
+  }
+
+  @override
+  AppPalette lerp(ThemeExtension<AppPalette>? other, double t) {
+    if (other is! AppPalette) return this;
+    return AppPalette(
+      backgroundBase: Color.lerp(backgroundBase, other.backgroundBase, t)!,
+      backgroundSecondary:
+          Color.lerp(backgroundSecondary, other.backgroundSecondary, t)!,
+      surfaceGlass: Color.lerp(surfaceGlass, other.surfaceGlass, t)!,
+      surfaceElevated: Color.lerp(surfaceElevated, other.surfaceElevated, t)!,
+      primary: Color.lerp(primary, other.primary, t)!,
+      primarySoft: Color.lerp(primarySoft, other.primarySoft, t)!,
+      accent: Color.lerp(accent, other.accent, t)!,
+      textPrimary: Color.lerp(textPrimary, other.textPrimary, t)!,
+      textSecondary: Color.lerp(textSecondary, other.textSecondary, t)!,
+      textMuted: Color.lerp(textMuted, other.textMuted, t)!,
+      border: Color.lerp(border, other.border, t)!,
+      glassBorder: Color.lerp(glassBorder, other.glassBorder, t)!,
+      glassShadow: Color.lerp(glassShadow, other.glassShadow, t)!,
+      overlaySoft: Color.lerp(overlaySoft, other.overlaySoft, t)!,
+      overlayStrong: Color.lerp(overlayStrong, other.overlayStrong, t)!,
+      success: Color.lerp(success, other.success, t)!,
+      error: Color.lerp(error, other.error, t)!,
+      warning: Color.lerp(warning, other.warning, t)!,
+      heroGradient: t < 0.5 ? heroGradient : other.heroGradient,
+      backgroundGradient: t < 0.5 ? backgroundGradient : other.backgroundGradient,
+      primaryGradient: t < 0.5 ? primaryGradient : other.primaryGradient,
+      glassGradient: t < 0.5 ? glassGradient : other.glassGradient,
+    );
+  }
+}
+
 class DesignSystem {
-  // Colors
-  static const Color primaryEmerald = Color(0xFF19C37D);
-  static const Color primaryGlow = Color(0xFF37E89B);
-  static const Color accentLime = Color(0xFF5BFFB2);
-  static const Color backgroundBase = Color(0xFF0B0F0C);
-  static const Color backgroundSecondary = Color(0xFF101612);
-  static const Color surfaceGlass = Color(0x261E2A24);
-  static const Color surfaceElevated = Color(0xFF1A221E);
-  static const Color surfaceMuted = Color(0xFF121816);
-  static const Color textPrimary = Color(0xFFF5F7F6);
-  static const Color textSecondary = Color(0xFF9FB0A7);
-  static const Color textMuted = Color(0xFF73827A);
+  // Legacy light palette
+  static const Color primaryIndigo = Color(0xFF6C4CF1);
+  static const Color primaryLight = Color(0xFF8B7CF8);
+  static const Color primaryDark = Color(0xFF4D3BC7);
+  static const Color backgroundLavender = Color(0xFFDADBFA);
+  static const Color backgroundLight = Color(0xFFEFF0FF);
+  static const Color backgroundWhite = Color(0xFFFFFFFF);
+  static const Color textPrimary = Color(0xFF0C0E68);
+  static const Color textSecondary = Color(0xFF5A5A7A);
   static const Color textWhite = Color(0xFFFFFFFF);
-  static const Color borderLight = Color(0x2E8CB59F);
-  static const Color glassBorder = Color(0x4D9CC8B0);
-  static const Color glassHighlight = Color(0x1AFFFFFF);
-  static const Color glassShadow = Color(0x66060A08);
-  static const Color success = Color(0xFF21D07A);
-  static const Color error = Color(0xFFFF6B74);
-  static const Color warning = Color(0xFFFFBC58);
-  static const Color info = Color(0xFF60B5FF);
-  static const Color overlayLight = Color(0x1419C37D);
-  static const Color overlayMedium = Color(0x2E19C37D);
+  static const Color textLight = Color(0xFF8A8AA3);
+  static const Color success = Color(0xFF2E7D32);
+  static const Color error = Color(0xFFD32F2F);
+  static const Color warning = Color(0xFFED6C02);
+  static const Color info = Color(0xFF0288D1);
+  static const Color borderLight = Color(0xFFE0E0F0);
+  static const Color borderFocus = primaryIndigo;
+  static const Color shadowColor = Color(0xFF0C0E68);
+  static const Color overlayLight = Color(0x1A0C0E68);
+  static const Color overlayMedium = Color(0x330C0E68);
+  static const Color backgroundBase = Color(0xFFF6F4FF);
+  static const Color backgroundSecondary = Color(0xFFE8E4FF);
+  static const Color surfaceGlass = Color(0xD9FFFFFF);
+  static const Color surfaceElevated = Color(0xFFFFFFFF);
+  static const Color accentLime = Color(0xFF7E61FF);
+  static const Color glassBorder = Color(0x88FFFFFF);
 
-  // Legacy aliases
-  static const Color primaryIndigo = primaryEmerald;
-  static const Color primaryLight = primaryGlow;
-  static const Color primaryDark = Color(0xFF108156);
-  static const Color backgroundLavender = backgroundBase;
-  static const Color backgroundLight = backgroundSecondary;
-  static const Color backgroundWhite = surfaceMuted;
-  static const Color borderFocus = accentLime;
-  static const Color shadowColor = glassShadow;
-  static const LinearGradient lavenderGradient = ambientGradient;
-
-  // Gradients
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [
-      primaryEmerald,
-      accentLime,
-    ],
+    colors: [primaryIndigo, primaryLight],
   );
 
-  static const LinearGradient ambientGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [
-      Color(0xFF0B0F0C),
-      Color(0xFF101612),
-      Color(0xFF121816),
-    ],
-    stops: [0, 0.45, 1],
+  static const LinearGradient lavenderGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [backgroundLavender, backgroundLight],
   );
 
-  static const LinearGradient heroGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [
-      Color(0xFF153126),
-      Color(0xFF0F1713),
-      Color(0xFF0B0F0C),
-    ],
+  static const AppPalette lightPalette = AppPalette(
+    backgroundBase: Color(0xFFF6F4FF),
+    backgroundSecondary: Color(0xFFE8E4FF),
+    surfaceGlass: Color(0xD9FFFFFF),
+    surfaceElevated: Color(0xFFFFFFFF),
+    primary: Color(0xFF6C4CF1),
+    primarySoft: Color(0xFFA79AFF),
+    accent: Color(0xFF7E61FF),
+    textPrimary: Color(0xFF16113A),
+    textSecondary: Color(0xFF5F5B86),
+    textMuted: Color(0xFF928DB5),
+    border: Color(0xFFE1DAFF),
+    glassBorder: Color(0x88FFFFFF),
+    glassShadow: Color(0x220C0E68),
+    overlaySoft: Color(0x146C4CF1),
+    overlayStrong: Color(0x286C4CF1),
+    success: Color(0xFF2E7D32),
+    error: Color(0xFFD32F2F),
+    warning: Color(0xFFED6C02),
+    heroGradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [Color(0xFFEAE5FF), Color(0xFFD8D1FF), Color(0xFFC6BBFF)],
+    ),
+    backgroundGradient: LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [Color(0xFFF8F7FF), Color(0xFFEAE6FF)],
+    ),
+    primaryGradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [Color(0xFF6C4CF1), Color(0xFF8C76FF)],
+    ),
+    glassGradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [Color(0xE6FFFFFF), Color(0xCCF4F0FF)],
+    ),
   );
 
-  static const LinearGradient glassGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [
-      Color(0x2AFFFFFF),
-      Color(0x140F1713),
-    ],
+  static const AppPalette darkPalette = AppPalette(
+    backgroundBase: Color(0xFF0F122B),
+    backgroundSecondary: Color(0xFF171A3D),
+    surfaceGlass: Color(0x661B1F4A),
+    surfaceElevated: Color(0xFF202655),
+    primary: Color(0xFF9F8CFF),
+    primarySoft: Color(0xFFC5BCFF),
+    accent: Color(0xFFEBE8FF),
+    textPrimary: Color(0xFFF6F3FF),
+    textSecondary: Color(0xFFC2BCF1),
+    textMuted: Color(0xFF938DBF),
+    border: Color(0xFF313A74),
+    glassBorder: Color(0x666E7FD6),
+    glassShadow: Color(0x66060816),
+    overlaySoft: Color(0x149F8CFF),
+    overlayStrong: Color(0x2A9F8CFF),
+    success: Color(0xFF57D08B),
+    error: Color(0xFFFF7B8E),
+    warning: Color(0xFFFFC26B),
+    heroGradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [Color(0xFF1A1F55), Color(0xFF14173B), Color(0xFF0F122B)],
+    ),
+    backgroundGradient: LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [Color(0xFF14173B), Color(0xFF0F122B)],
+    ),
+    primaryGradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [Color(0xFFA796FF), Color(0xFFD5CCFF)],
+    ),
+    glassGradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [Color(0x3AFFFFFF), Color(0x121B1F4A)],
+    ),
   );
+
+  static AppPalette paletteOf(BuildContext context) =>
+      Theme.of(context).extension<AppPalette>() ?? lightPalette;
+
+  static bool isDark(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark;
 
   // Typography
-  static const double fontSizeDisplay1 = 36;
-  static const double fontSizeDisplay2 = 30;
-  static const double fontSizeH1 = 28;
-  static const double fontSizeH2 = 24;
-  static const double fontSizeH3 = 20;
-  static const double fontSizeH4 = 18;
-  static const double fontSizeH5 = 16;
+  static const double fontSizeDisplay1 = 34;
+  static const double fontSizeDisplay2 = 28;
+  static const double fontSizeH1 = 32;
+  static const double fontSizeH2 = 28;
+  static const double fontSizeH3 = 24;
+  static const double fontSizeH4 = 20;
+  static const double fontSizeH5 = 18;
+  static const double fontSizeH6 = 16;
   static const double fontSizeBodyLarge = 16;
   static const double fontSizeBodyMedium = 14;
   static const double fontSizeBodySmall = 12;
-  static const double fontSizeCaption = 11;
-  static const double fontSizeButton = 15;
+  static const double fontSizeCaption = 12;
+  static const double fontSizeButton = 16;
   static const double fontSizeOverline = 10;
   static const double fontSizeStat = 24;
 
@@ -99,7 +284,6 @@ class DesignSystem {
   static const FontWeight fontWeightBold = FontWeight.w700;
 
   static const double letterSpacingTight = -0.4;
-  static const double letterSpacingNormal = 0;
   static const double letterSpacingWide = 0.35;
   static const double lineHeightTight = 1.15;
   static const double lineHeightNormal = 1.45;
@@ -109,105 +293,80 @@ class DesignSystem {
         fontWeight: fontWeightBold,
         letterSpacing: letterSpacingTight,
         height: lineHeightTight,
-        color: textPrimary,
       );
-
   static TextStyle get displayMedium => GoogleFonts.inter(
         fontSize: fontSizeDisplay2,
         fontWeight: fontWeightBold,
         letterSpacing: letterSpacingTight,
         height: lineHeightTight,
-        color: textPrimary,
       );
-
   static TextStyle get headline1 => GoogleFonts.inter(
         fontSize: fontSizeH1,
         fontWeight: fontWeightBold,
         height: lineHeightTight,
-        color: textPrimary,
       );
-
   static TextStyle get headline2 => GoogleFonts.inter(
         fontSize: fontSizeH2,
         fontWeight: fontWeightSemiBold,
         height: lineHeightTight,
-        color: textPrimary,
       );
-
   static TextStyle get headline3 => GoogleFonts.inter(
         fontSize: fontSizeH3,
         fontWeight: fontWeightSemiBold,
         height: lineHeightTight,
-        color: textPrimary,
       );
-
   static TextStyle get headline4 => GoogleFonts.inter(
         fontSize: fontSizeH4,
         fontWeight: fontWeightSemiBold,
         height: lineHeightTight,
-        color: textPrimary,
       );
-
   static TextStyle get headline5 => GoogleFonts.inter(
         fontSize: fontSizeH5,
         fontWeight: fontWeightSemiBold,
         height: lineHeightTight,
-        color: textPrimary,
       );
-
   static TextStyle get bodyLarge => GoogleFonts.inter(
         fontSize: fontSizeBodyLarge,
         fontWeight: fontWeightRegular,
         height: lineHeightNormal,
         color: textPrimary,
       );
-
   static TextStyle get bodyMedium => GoogleFonts.inter(
         fontSize: fontSizeBodyMedium,
         fontWeight: fontWeightRegular,
         height: lineHeightNormal,
         color: textSecondary,
       );
-
   static TextStyle get bodySmall => GoogleFonts.inter(
         fontSize: fontSizeBodySmall,
         fontWeight: fontWeightRegular,
         height: lineHeightNormal,
-        color: textMuted,
+        color: textLight,
       );
-
   static TextStyle get button => GoogleFonts.inter(
         fontSize: fontSizeButton,
         fontWeight: fontWeightSemiBold,
         letterSpacing: letterSpacingWide,
         height: lineHeightTight,
-        color: backgroundBase,
       );
-
   static TextStyle get caption => GoogleFonts.inter(
         fontSize: fontSizeCaption,
         fontWeight: fontWeightMedium,
-        letterSpacing: 0.2,
         height: lineHeightNormal,
-        color: textMuted,
       );
-
   static TextStyle get overline => GoogleFonts.inter(
         fontSize: fontSizeOverline,
         fontWeight: fontWeightBold,
-        letterSpacing: 1.4,
-        color: accentLime,
+        letterSpacing: 1.3,
       );
-
   static TextStyle get statValue => GoogleFonts.inter(
         fontSize: fontSizeStat,
         fontWeight: fontWeightBold,
-        color: textPrimary,
       );
 
   // Spacing
-  static const double spacing4 = 4;
   static const double spacing2 = 2;
+  static const double spacing4 = 4;
   static const double spacing6 = 6;
   static const double spacing8 = 8;
   static const double spacing12 = 12;
@@ -229,12 +388,18 @@ class DesignSystem {
   static const EdgeInsets paddingAll20 = EdgeInsets.all(spacing20);
   static const EdgeInsets paddingAll24 = EdgeInsets.all(spacing24);
   static const EdgeInsets paddingAll32 = EdgeInsets.all(spacing32);
-  static const EdgeInsets paddingHorizontal16 = EdgeInsets.symmetric(horizontal: spacing16);
-  static const EdgeInsets paddingHorizontal20 = EdgeInsets.symmetric(horizontal: spacing20);
-  static const EdgeInsets paddingHorizontal24 = EdgeInsets.symmetric(horizontal: spacing24);
-  static const EdgeInsets paddingVertical8 = EdgeInsets.symmetric(vertical: spacing8);
-  static const EdgeInsets paddingVertical16 = EdgeInsets.symmetric(vertical: spacing16);
-  static const EdgeInsets paddingVertical24 = EdgeInsets.symmetric(vertical: spacing24);
+  static const EdgeInsets paddingHorizontal16 =
+      EdgeInsets.symmetric(horizontal: spacing16);
+  static const EdgeInsets paddingHorizontal20 =
+      EdgeInsets.symmetric(horizontal: spacing20);
+  static const EdgeInsets paddingHorizontal24 =
+      EdgeInsets.symmetric(horizontal: spacing24);
+  static const EdgeInsets paddingVertical8 =
+      EdgeInsets.symmetric(vertical: spacing8);
+  static const EdgeInsets paddingVertical16 =
+      EdgeInsets.symmetric(vertical: spacing16);
+  static const EdgeInsets paddingVertical24 =
+      EdgeInsets.symmetric(vertical: spacing24);
   static const EdgeInsets marginAll16 = EdgeInsets.all(spacing16);
   static const EdgeInsets marginBottom12 = EdgeInsets.only(bottom: spacing12);
   static const EdgeInsets marginBottom16 = EdgeInsets.only(bottom: spacing16);
@@ -248,8 +413,8 @@ class DesignSystem {
   static const SizedBox gap32 = SizedBox(height: spacing32, width: spacing32);
   static const SizedBox gap40 = SizedBox(height: spacing40, width: spacing40);
   static const SizedBox gap48 = SizedBox(height: spacing48, width: spacing48);
-  static const SizedBox gap64 = SizedBox(height: spacing64, width: spacing64);
   static const SizedBox gap56 = SizedBox(height: spacing56, width: spacing56);
+  static const SizedBox gap64 = SizedBox(height: spacing64, width: spacing64);
   static const SizedBox gap80 = SizedBox(height: spacing80, width: spacing80);
   static const SizedBox gap96 = SizedBox(height: spacing96, width: spacing96);
 
@@ -269,17 +434,15 @@ class DesignSystem {
   static const RoundedRectangleBorder cardShape = RoundedRectangleBorder(
     borderRadius: BorderRadius.all(Radius.circular(radiusXLarge)),
   );
-
   static const RoundedRectangleBorder buttonShape = RoundedRectangleBorder(
     borderRadius: BorderRadius.all(Radius.circular(radiusLarge)),
   );
-
   static const RoundedRectangleBorder inputShape = RoundedRectangleBorder(
     borderRadius: BorderRadius.all(Radius.circular(radiusLarge)),
   );
 
   static Border borderLightBorder = Border.all(color: borderLight, width: 1);
-  static Border borderFocusBorder = Border.all(color: accentLime, width: 1.4);
+  static Border borderFocusBorder = Border.all(color: borderFocus, width: 1.4);
   static Border borderErrorBorder = Border.all(color: error, width: 1.2);
 
   static const double elevation0 = 0;
@@ -293,7 +456,6 @@ class DesignSystem {
   static const double iconLarge = 32;
   static const double iconXLarge = 48;
 
-  // Motion
   static const Duration animationFast = Duration(milliseconds: 180);
   static const Duration animationNormal = Duration(milliseconds: 320);
   static const Duration animationSlow = Duration(milliseconds: 520);
@@ -301,136 +463,159 @@ class DesignSystem {
   static const Curve curveStandard = Curves.easeOutCubic;
   static const Curve curveEmphasized = Curves.easeInOutCubicEmphasized;
 
-  // Effects
   static List<BoxShadow> shadowSmall = const [
-    BoxShadow(
-      color: glassShadow,
-      blurRadius: 18,
-      offset: Offset(0, 8),
-    ),
-  ];
+        BoxShadow(
+          color: Color(0x220C0E68),
+          blurRadius: 18,
+          offset: Offset(0, 8),
+        ),
+      ];
 
   static List<BoxShadow> shadowMedium = const [
-    BoxShadow(
-      color: glassShadow,
-      blurRadius: 28,
-      offset: Offset(0, 14),
-    ),
-  ];
+        BoxShadow(
+          color: Color(0x220C0E68),
+          blurRadius: 28,
+          offset: Offset(0, 14),
+        ),
+      ];
 
-  static List<BoxShadow> glowShadow = const [
-    BoxShadow(
-      color: Color(0x5C19C37D),
-      blurRadius: 24,
-      offset: Offset(0, 8),
-    ),
-  ];
+  static List<BoxShadow> shadowSmallFor(BuildContext context) => [
+        BoxShadow(
+          color: paletteOf(context).glassShadow,
+          blurRadius: 18,
+          offset: const Offset(0, 8),
+        ),
+      ];
 
-  static BoxDecoration glassDecoration({BorderRadius? radius}) {
+  static List<BoxShadow> shadowMediumFor(BuildContext context) => [
+        BoxShadow(
+          color: paletteOf(context).glassShadow,
+          blurRadius: 28,
+          offset: const Offset(0, 14),
+        ),
+      ];
+
+  static List<BoxShadow> glowShadowFor(BuildContext context) => [
+        BoxShadow(
+          color: paletteOf(context).primary.withValues(alpha: 0.28),
+          blurRadius: 22,
+          offset: const Offset(0, 8),
+        ),
+      ];
+
+  static BoxDecoration glassDecoration(
+    BuildContext context, {
+    BorderRadius? radius,
+  }) {
+    final palette = paletteOf(context);
     return BoxDecoration(
       borderRadius: radius ?? borderRadiusXLarge,
-      gradient: glassGradient,
-      border: Border.all(color: glassBorder),
-      boxShadow: shadowMedium,
+      gradient: palette.glassGradient,
+      border: Border.all(color: palette.glassBorder),
+      boxShadow: shadowMediumFor(context),
     );
   }
 
-  static BoxDecoration elevatedDecoration({BorderRadius? radius}) {
+  static BoxDecoration elevatedDecoration(
+    BuildContext context, {
+    BorderRadius? radius,
+  }) {
+    final palette = paletteOf(context);
     return BoxDecoration(
-      color: surfaceElevated,
+      color: palette.surfaceElevated,
       borderRadius: radius ?? borderRadiusLarge,
-      border: Border.all(color: borderLight),
-      boxShadow: shadowSmall,
+      border: Border.all(color: palette.border),
+      boxShadow: shadowSmallFor(context),
     );
   }
 
-  static BoxDecoration primaryButtonDecoration = BoxDecoration(
-    gradient: primaryGradient,
-    borderRadius: borderRadiusLarge,
-    boxShadow: glowShadow,
-  );
+  static ThemeData get theme => lightTheme;
 
-  static BoxDecoration cardDecoration = elevatedDecoration();
-  static BoxDecoration lavenderCardDecoration = glassDecoration();
-  static BoxDecoration whiteCardDecoration = elevatedDecoration(
-    radius: borderRadiusLarge,
-  );
-  static BoxDecoration inputDecoration = elevatedDecoration(
-    radius: borderRadiusLarge,
-  );
-  static BoxDecoration inputFocusDecoration = BoxDecoration(
-    color: surfaceElevated,
-    borderRadius: borderRadiusLarge,
-    border: borderFocusBorder,
-    boxShadow: glowShadow,
-  );
-  static BoxDecoration circularIconDecoration = BoxDecoration(
-    color: surfaceGlass,
-    shape: BoxShape.circle,
-    border: Border.all(color: glassBorder),
-  );
+  static ThemeData get lightTheme => _buildTheme(
+        brightness: Brightness.light,
+        palette: lightPalette,
+      );
 
-  static ThemeData get theme {
-    final base = ThemeData.dark(useMaterial3: true);
+  static ThemeData get darkTheme => _buildTheme(
+        brightness: Brightness.dark,
+        palette: darkPalette,
+      );
+
+  static ThemeData _buildTheme({
+    required Brightness brightness,
+    required AppPalette palette,
+  }) {
+    final base = brightness == Brightness.dark
+        ? ThemeData.dark(useMaterial3: true)
+        : ThemeData.light(useMaterial3: true);
+
     final textTheme = GoogleFonts.interTextTheme(base.textTheme).copyWith(
-      displayLarge: displayLarge,
-      displayMedium: displayMedium,
-      headlineLarge: headline1,
-      headlineMedium: headline2,
-      headlineSmall: headline3,
-      titleLarge: headline4,
-      titleMedium: headline5,
-      bodyLarge: bodyLarge,
-      bodyMedium: bodyMedium,
-      bodySmall: bodySmall,
-      labelLarge: button,
-      labelSmall: caption,
+      displayLarge: displayLarge.copyWith(color: palette.textPrimary),
+      displayMedium: displayMedium.copyWith(color: palette.textPrimary),
+      headlineLarge: headline1.copyWith(color: palette.textPrimary),
+      headlineMedium: headline2.copyWith(color: palette.textPrimary),
+      headlineSmall: headline3.copyWith(color: palette.textPrimary),
+      titleLarge: headline4.copyWith(color: palette.textPrimary),
+      titleMedium: headline5.copyWith(color: palette.textPrimary),
+      bodyLarge: bodyLarge.copyWith(color: palette.textPrimary),
+      bodyMedium: bodyMedium.copyWith(color: palette.textSecondary),
+      bodySmall: bodySmall.copyWith(color: palette.textMuted),
+      labelLarge: button.copyWith(
+        color: brightness == Brightness.dark
+            ? palette.backgroundBase
+            : palette.textWhite,
+      ),
+      labelSmall: caption.copyWith(color: palette.textMuted),
     );
 
     return base.copyWith(
-      colorScheme: const ColorScheme.dark(
-        primary: primaryEmerald,
-        secondary: accentLime,
-        surface: surfaceMuted,
-        error: error,
-        onPrimary: backgroundBase,
-        onSecondary: backgroundBase,
-        onSurface: textPrimary,
-        onError: textWhite,
+      extensions: <ThemeExtension<dynamic>>[palette],
+      colorScheme: ColorScheme(
+        brightness: brightness,
+        primary: palette.primary,
+        onPrimary: brightness == Brightness.dark
+            ? palette.backgroundBase
+            : palette.textWhite,
+        secondary: palette.primarySoft,
+        onSecondary: palette.textPrimary,
+        error: palette.error,
+        onError: palette.textWhite,
+        surface: palette.surfaceElevated,
+        onSurface: palette.textPrimary,
       ),
-      scaffoldBackgroundColor: backgroundBase,
-      primaryColor: primaryEmerald,
+      scaffoldBackgroundColor: palette.backgroundBase,
+      primaryColor: palette.primary,
       textTheme: textTheme,
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
-        foregroundColor: textPrimary,
+        foregroundColor: palette.textPrimary,
         elevation: 0,
         centerTitle: false,
-        titleTextStyle: headline4,
+        titleTextStyle: headline4.copyWith(color: palette.textPrimary),
       ),
       cardTheme: CardThemeData(
-        color: surfaceMuted,
-        shadowColor: glassShadow,
+        color: palette.surfaceElevated,
+        shadowColor: palette.glassShadow,
         elevation: 0,
         shape: cardShape,
         margin: marginAll16,
       ),
-      dividerTheme: const DividerThemeData(
-        color: borderLight,
+      dividerTheme: DividerThemeData(
+        color: palette.border,
         thickness: 1,
         space: spacing24,
       ),
-      iconTheme: const IconThemeData(
-        color: textPrimary,
+      iconTheme: IconThemeData(
+        color: palette.textPrimary,
         size: 22,
       ),
-      progressIndicatorTheme: const ProgressIndicatorThemeData(
-        color: accentLime,
-        linearTrackColor: surfaceElevated,
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: palette.primary,
+        linearTrackColor: palette.backgroundSecondary,
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: surfaceElevated,
-        contentTextStyle: bodyMedium.copyWith(color: textPrimary),
+        backgroundColor: palette.surfaceElevated,
+        contentTextStyle: bodyMedium.copyWith(color: palette.textPrimary),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: borderRadiusLarge),
       ),
@@ -441,35 +626,37 @@ class DesignSystem {
           horizontal: spacing20,
           vertical: spacing18,
         ),
-        hintStyle: bodyMedium.copyWith(color: textMuted),
-        labelStyle: bodyMedium.copyWith(color: textSecondary),
-        prefixIconColor: textSecondary,
-        suffixIconColor: textSecondary,
+        hintStyle: bodyMedium.copyWith(color: palette.textMuted),
+        labelStyle: bodyMedium.copyWith(color: palette.textSecondary),
+        prefixIconColor: palette.textSecondary,
+        suffixIconColor: palette.textSecondary,
         enabledBorder: OutlineInputBorder(
           borderRadius: borderRadiusLarge,
-          borderSide: const BorderSide(color: borderLight),
+          borderSide: BorderSide(color: palette.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: borderRadiusLarge,
-          borderSide: const BorderSide(color: accentLime, width: 1.4),
+          borderSide: BorderSide(color: palette.primary, width: 1.4),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: borderRadiusLarge,
-          borderSide: const BorderSide(color: error, width: 1.2),
+          borderSide: BorderSide(color: palette.error, width: 1.2),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: borderRadiusLarge,
-          borderSide: const BorderSide(color: error, width: 1.4),
+          borderSide: BorderSide(color: palette.error, width: 1.4),
         ),
         border: OutlineInputBorder(
           borderRadius: borderRadiusLarge,
-          borderSide: const BorderSide(color: borderLight),
+          borderSide: BorderSide(color: palette.border),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: primaryEmerald,
-          foregroundColor: backgroundBase,
+          backgroundColor: palette.primary,
+          foregroundColor: brightness == Brightness.dark
+              ? palette.backgroundBase
+              : palette.textWhite,
           minimumSize: const Size(double.infinity, spacing56),
           shape: buttonShape,
           padding: paddingHorizontal24,
@@ -479,66 +666,51 @@ class DesignSystem {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: textPrimary,
+          foregroundColor: palette.textPrimary,
           minimumSize: const Size(double.infinity, spacing56),
           shape: buttonShape,
-          side: const BorderSide(color: glassBorder),
+          side: BorderSide(color: palette.glassBorder),
           textStyle: bodyMedium.copyWith(
-            color: textPrimary,
+            color: palette.textPrimary,
             fontWeight: fontWeightSemiBold,
           ),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: accentLime,
+          foregroundColor: palette.primary,
           textStyle: bodyMedium.copyWith(
-            color: accentLime,
+            color: palette.primary,
             fontWeight: fontWeightSemiBold,
           ),
         ),
       ),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: Colors.transparent,
-        selectedItemColor: accentLime,
-        unselectedItemColor: textMuted,
+        selectedItemColor: palette.primary,
+        unselectedItemColor: palette.textMuted,
         type: BottomNavigationBarType.fixed,
         elevation: 0,
       ),
       checkboxTheme: CheckboxThemeData(
         fillColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) {
-            return accentLime;
-          }
+          if (states.contains(WidgetState.selected)) return palette.primary;
           return Colors.transparent;
         }),
-        checkColor: WidgetStateProperty.all(backgroundBase),
-        side: const BorderSide(color: glassBorder),
+        side: BorderSide(color: palette.glassBorder),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(radiusSmall),
         ),
       ),
-      switchTheme: SwitchThemeData(
-        thumbColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) {
-            return accentLime;
-          }
-          return textMuted;
-        }),
-        trackColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) {
-            return primaryEmerald.withValues(alpha: 0.35);
-          }
-          return surfaceElevated;
-        }),
-      ),
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: primaryEmerald,
-        foregroundColor: backgroundBase,
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: palette.primary,
+        foregroundColor: brightness == Brightness.dark
+            ? palette.backgroundBase
+            : palette.textWhite,
       ),
       listTileTheme: ListTileThemeData(
-        iconColor: textPrimary,
-        textColor: textPrimary,
+        iconColor: palette.textPrimary,
+        textColor: palette.textPrimary,
         tileColor: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: borderRadiusLarge),
       ),
@@ -547,17 +719,14 @@ class DesignSystem {
 }
 
 extension OldAppTheme on DesignSystem {
-  static Color get purplePrimary => DesignSystem.primaryEmerald;
-  static Color get purpleBackground => DesignSystem.backgroundBase;
-  static Color get purpleLight => DesignSystem.backgroundSecondary;
-  static Color get purpleSecondary => DesignSystem.accentLime;
+  static Color get purplePrimary => DesignSystem.primaryIndigo;
+  static Color get purpleBackground => DesignSystem.backgroundLavender;
+  static Color get purpleLight => DesignSystem.backgroundLight;
+  static Color get purpleSecondary => DesignSystem.primaryIndigo;
 }
 
 extension DesignSystemExtension on BuildContext {
-  Color get primaryIndigo => DesignSystem.primaryEmerald;
-  Color get backgroundLavender => DesignSystem.backgroundBase;
-  Color get textPrimary => DesignSystem.textPrimary;
-  Color get textSecondary => DesignSystem.textSecondary;
+  AppPalette get palette => DesignSystem.paletteOf(this);
   double get spacing8 => DesignSystem.spacing8;
   double get spacing16 => DesignSystem.spacing16;
   double get spacing24 => DesignSystem.spacing24;
@@ -565,11 +734,6 @@ extension DesignSystemExtension on BuildContext {
   EdgeInsets get paddingHorizontal16 => DesignSystem.paddingHorizontal16;
   SizedBox get gap8 => DesignSystem.gap8;
   SizedBox get gap16 => DesignSystem.gap16;
-  BoxDecoration get cardDecoration => DesignSystem.elevatedDecoration();
-  BoxDecoration get lavenderCardDecoration => DesignSystem.glassDecoration();
-  TextStyle get bodyLarge => DesignSystem.bodyLarge;
-  TextStyle get bodyMedium => DesignSystem.bodyMedium;
-  TextStyle get headline4 => DesignSystem.headline4;
   BorderRadius get radiusLarge => DesignSystem.borderRadiusLarge;
   BorderRadius get radiusXLarge => DesignSystem.borderRadiusXLarge;
 }

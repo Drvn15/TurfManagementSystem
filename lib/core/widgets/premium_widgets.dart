@@ -14,8 +14,9 @@ class AppBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = DesignSystem.paletteOf(context);
     return Container(
-      decoration: const BoxDecoration(gradient: DesignSystem.ambientGradient),
+      decoration: BoxDecoration(gradient: palette.backgroundGradient),
       child: Stack(
         children: [
           Positioned(
@@ -24,7 +25,7 @@ class AppBackground extends StatelessWidget {
             child: _GlowOrb(
               size: 220,
               colors: [
-                DesignSystem.primaryGlow.withValues(alpha: 0.22),
+                palette.primary.withValues(alpha: 0.18),
                 Colors.transparent,
               ],
             ),
@@ -35,7 +36,7 @@ class AppBackground extends StatelessWidget {
             child: _GlowOrb(
               size: 280,
               colors: [
-                DesignSystem.primaryEmerald.withValues(alpha: 0.18),
+                palette.primarySoft.withValues(alpha: 0.12),
                 Colors.transparent,
               ],
             ),
@@ -100,7 +101,7 @@ class GlassCard extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
         child: Container(
           padding: padding,
-          decoration: DesignSystem.glassDecoration(radius: radius),
+          decoration: DesignSystem.glassDecoration(context, radius: radius),
           child: child,
         ),
       ),
@@ -132,6 +133,9 @@ class _GlowButtonState extends State<GlowButton> {
   @override
   Widget build(BuildContext context) {
     final enabled = widget.onPressed != null && !widget.isLoading;
+    final palette = DesignSystem.paletteOf(context);
+    final isDark = DesignSystem.isDark(context);
+
     return GestureDetector(
       onTapDown: enabled ? (_) => setState(() => _pressed = true) : null,
       onTapCancel: enabled ? () => setState(() => _pressed = false) : null,
@@ -145,23 +149,28 @@ class _GlowButtonState extends State<GlowButton> {
           opacity: enabled ? 1 : 0.55,
           child: Container(
             height: DesignSystem.spacing56,
-            decoration: DesignSystem.primaryButtonDecoration,
+            decoration: BoxDecoration(
+              gradient: palette.primaryGradient,
+              borderRadius: DesignSystem.borderRadiusLarge,
+              boxShadow: DesignSystem.glowShadowFor(context),
+            ),
             child: ElevatedButton(
               onPressed: enabled ? widget.onPressed : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.transparent,
                 shadowColor: Colors.transparent,
-                foregroundColor: DesignSystem.backgroundBase,
+                foregroundColor:
+                    isDark ? palette.backgroundBase : DesignSystem.textWhite,
                 shape: DesignSystem.buttonShape,
               ),
               child: widget.isLoading
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2.4,
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          DesignSystem.backgroundBase,
+                          isDark ? palette.backgroundBase : DesignSystem.textWhite,
                         ),
                       ),
                     )
@@ -172,7 +181,14 @@ class _GlowButtonState extends State<GlowButton> {
                           widget.leading!,
                           const SizedBox(width: DesignSystem.spacing8),
                         ],
-                        Text(widget.label, style: DesignSystem.button),
+                        Text(
+                          widget.label,
+                          style: DesignSystem.button.copyWith(
+                            color: isDark
+                                ? palette.backgroundBase
+                                : DesignSystem.textWhite,
+                          ),
+                        ),
                       ],
                     ),
             ),
@@ -197,15 +213,25 @@ class SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = DesignSystem.paletteOf(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(eyebrow.toUpperCase(), style: DesignSystem.overline),
+        Text(
+          eyebrow.toUpperCase(),
+          style: DesignSystem.overline.copyWith(color: palette.primary),
+        ),
         const SizedBox(height: DesignSystem.spacing8),
-        Text(title, style: DesignSystem.headline2),
+        Text(
+          title,
+          style: DesignSystem.headline2.copyWith(color: palette.textPrimary),
+        ),
         if (subtitle != null) ...[
           const SizedBox(height: DesignSystem.spacing8),
-          Text(subtitle!, style: DesignSystem.bodyMedium),
+          Text(
+            subtitle!,
+            style: DesignSystem.bodyMedium.copyWith(color: palette.textSecondary),
+          ),
         ],
       ],
     );
@@ -226,6 +252,7 @@ class PremiumStatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = DesignSystem.paletteOf(context);
     return GlassCard(
       padding: DesignSystem.paddingAll16,
       borderRadius: DesignSystem.borderRadiusLarge,
@@ -236,19 +263,22 @@ class PremiumStatCard extends StatelessWidget {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: DesignSystem.overlayMedium,
+              color: palette.overlayStrong,
               borderRadius: DesignSystem.borderRadiusMedium,
-              border: Border.all(color: DesignSystem.glassBorder),
+              border: Border.all(color: palette.glassBorder),
             ),
-            child: Icon(
-              icon,
-              color: DesignSystem.accentLime,
-            ),
+            child: Icon(icon, color: palette.primary),
           ),
           const SizedBox(height: DesignSystem.spacing16),
-          Text(value, style: DesignSystem.statValue),
+          Text(
+            value,
+            style: DesignSystem.statValue.copyWith(color: palette.textPrimary),
+          ),
           const SizedBox(height: DesignSystem.spacing4),
-          Text(label, style: DesignSystem.bodySmall),
+          Text(
+            label,
+            style: DesignSystem.bodySmall.copyWith(color: palette.textSecondary),
+          ),
         ],
       ),
     );
@@ -269,6 +299,7 @@ class PremiumEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = DesignSystem.paletteOf(context);
     return Center(
       child: GlassCard(
         child: Column(
@@ -279,22 +310,25 @@ class PremiumEmptyState extends StatelessWidget {
               height: 72,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: DesignSystem.overlayLight,
-                border: Border.all(color: DesignSystem.glassBorder),
+                color: palette.overlaySoft,
+                border: Border.all(color: palette.glassBorder),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.sports_soccer_rounded,
                 size: 34,
-                color: DesignSystem.accentLime,
+                color: palette.primary,
               ),
             ),
             const SizedBox(height: DesignSystem.spacing20),
-            Text(title, style: DesignSystem.headline4),
+            Text(
+              title,
+              style: DesignSystem.headline4.copyWith(color: palette.textPrimary),
+            ),
             const SizedBox(height: DesignSystem.spacing8),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: DesignSystem.bodyMedium,
+              style: DesignSystem.bodyMedium.copyWith(color: palette.textSecondary),
             ),
             if (action != null) ...[
               const SizedBox(height: DesignSystem.spacing20),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/design_system.dart';
 import '../../core/widgets/premium_widgets.dart';
+import '../../core/widgets/theme_toggle.dart';
 import 'auth_controller.dart';
 import 'auth_state.dart';
 import 'signup_screen.dart';
@@ -69,6 +70,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
+    final palette = DesignSystem.paletteOf(context);
 
     return PremiumScaffold(
       body: SafeArea(
@@ -81,6 +83,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const Align(
+                      alignment: Alignment.centerRight,
+                      child: ThemeSceneToggle(),
+                    ),
+                    const SizedBox(height: DesignSystem.spacing20),
                     const AuthHeader(
                       title: 'Book elite sports venues',
                       subtitle:
@@ -138,14 +145,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         width: double.infinity,
                         padding: DesignSystem.paddingAll16,
                         decoration: BoxDecoration(
-                          color: DesignSystem.error.withValues(alpha: 0.12),
+                          color: palette.error.withValues(alpha: 0.12),
                           borderRadius: DesignSystem.borderRadiusLarge,
-                          border: Border.all(color: DesignSystem.error),
+                          border: Border.all(color: palette.error),
                         ),
                         child: Text(
                           _errorMessage!,
                           style: DesignSystem.bodyMedium.copyWith(
-                            color: DesignSystem.textPrimary,
+                            color: palette.textPrimary,
                           ),
                         ),
                       ),

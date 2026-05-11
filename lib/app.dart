@@ -14,13 +14,17 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeMode = ref.watch(themeControllerProvider);
+    ref.watch(themeOptionProvider);
+    final themeController = ref.read(themeOptionProvider.notifier);
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Turf Booking',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: themeMode,
+      themeMode: themeController.getThemeMode(
+        MediaQuery.platformBrightnessOf(context),
+      ),
       home: const SplashScreen(nextScreen: AuthGate()),
     );
   }

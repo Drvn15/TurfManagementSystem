@@ -1,9 +1,9 @@
-import 'dart:math';
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/theme/design_system.dart';
+import '../../core/widgets/premium_widgets.dart';
+import '../../core/widgets/theme_dropdown.dart';
 import '../auth/auth_controller.dart';
 import '../booking/screens/my_booking_screen.dart';
 import '../turf/turf_controller.dart';
@@ -33,9 +33,9 @@ class _UserHomeScreenState extends ConsumerState<UserHomeScreen> {
 
   static const List<_NavItem> _navItems = [
     _NavItem('Explore', Icons.explore_rounded),
-    _NavItem('Bookings', Icons.handshake_outlined),
+    _NavItem('Bookings', Icons.event_note_rounded),
     _NavItem('Favourite', Icons.favorite_border_rounded),
-    _NavItem('Message', Icons.chat_bubble_outline_rounded),
+    _NavItem('Messages', Icons.chat_bubble_outline_rounded),
     _NavItem('Profile', Icons.person_rounded),
   ];
 
@@ -43,7 +43,14 @@ class _UserHomeScreenState extends ConsumerState<UserHomeScreen> {
   void initState() {
     super.initState();
     _fetchTurfs();
-    _searchController.addListener(_filterTurfs);
+    _searchController.addListener(_refreshSearch);
+  }
+
+  @override
+  void dispose() {
+    _searchController.removeListener(_refreshSearch);
+    _searchController.dispose();
+    super.dispose();
   }
 
   void _fetchTurfs() {
@@ -52,32 +59,14 @@ class _UserHomeScreenState extends ConsumerState<UserHomeScreen> {
     });
   }
 
-  void _filterTurfs() {
+  void _refreshSearch() {
     if (mounted) {
       setState(() {});
     }
   }
 
-  @override
-  void dispose() {
-    _searchController.removeListener(_filterTurfs);
-    _searchController.dispose();
-    super.dispose();
-  }
-
   Future<void> _refreshTurfs() async {
     await ref.read(turfControllerProvider.notifier).refreshAllTurfs();
-  }
-
-  void _toggleFavorite(dynamic turfId) {
-    final key = '$turfId';
-    setState(() {
-      if (_favoriteIds.contains(key)) {
-        _favoriteIds.remove(key);
-      } else {
-        _favoriteIds.add(key);
-      }
-    });
   }
 
   Future<void> _openBookings() async {
@@ -96,38 +85,95 @@ class _UserHomeScreenState extends ConsumerState<UserHomeScreen> {
     _refreshTurfs();
   }
 
-  void _onNavTapped(int index) {
+  void _toggleFavorite(dynamic turfId) {
+    final key = '$turfId';
     setState(() {
-      _selectedNavIndex = index;
+      if (_favoriteIds.contains(key)) {
+        _favoriteIds.remove(key);
+      } else {
+        _favoriteIds.add(key);
+      }
     });
+  }
 
-    if (index == 1) {
-      _openBookings();
-      return;
-    }
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
 
-    if (index == 4) {
-      ref.read(authControllerProvider.notifier).logout();
-      return;
-    }
-
-    if (index == 2 || index == 3) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            index == 2
-                ? 'Favorites UI is ready for wiring.'
-                : 'Messages UI is ready for wiring.',
+  Future<void> _showLogoutSheet() async {
+    final palette = DesignSystem.paletteOf(context);
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: GlassCard(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Profile',
+                    style: DesignSystem.headline4.copyWith(
+                      color: palette.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: DesignSystem.spacing8),
+                  Text(
+                    'Account controls are being expanded. You can sign out safely below.',
+                    style: DesignSystem.bodyMedium.copyWith(
+                      color: palette.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: DesignSystem.spacing20),
+                  GlowButton(
+                    label: 'Sign Out',
+                    onPressed: () {
+                      Navigator.pop(context);
+                      ref.read(authControllerProvider.notifier).logout();
+                    },
+                  ),
+                ],
+              ),
+            ),
           ),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+        );
+      },
+    );
+  }
+
+  void _onNavTapped(int index) {
+    setState(() => _selectedNavIndex = index);
+
+    switch (index) {
+      case 0:
+        break;
+      case 1:
+        _openBookings();
+        break;
+      case 2:
+        _showMessage('Favorites will surface here as you save venues.');
+        break;
+      case 3:
+        _showMessage('Messaging is planned next for venue communication.');
+        break;
+      case 4:
+        _showLogoutSheet();
+        break;
     }
   }
 
   List<Map<String, dynamic>> _applyFilters(List<Map<String, dynamic>> turfs) {
     final query = _searchController.text.trim().toLowerCase();
-    final selectedSport = _sportsCategories[_selectedCategoryIndex].label.toLowerCase();
+    final selectedSport =
+        _sportsCategories[_selectedCategoryIndex].label.toLowerCase();
 
     return turfs.where((turf) {
       final name = (turf['name'] ?? '').toString().toLowerCase();
@@ -141,8 +187,7 @@ class _UserHomeScreenState extends ConsumerState<UserHomeScreen> {
           location.contains(query) ||
           description.contains(query);
 
-      final matchesSport = selectedSport.isEmpty ||
-          sport.contains(selectedSport) ||
+      final matchesSport = sport.contains(selectedSport) ||
           inferredSport == 'multi-sport' ||
           inferredSport.contains(selectedSport) ||
           name.contains(selectedSport) ||
@@ -152,115 +197,210 @@ class _UserHomeScreenState extends ConsumerState<UserHomeScreen> {
     }).toList();
   }
 
+  void _showAllTurfsSheet(String title, List<Map<String, dynamic>> turfs) {
+    final palette = DesignSystem.paletteOf(context);
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: GlassCard(
+              child: SizedBox(
+                height: MediaQuery.sizeOf(context).height * 0.72,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: DesignSystem.headline4.copyWith(
+                        color: palette.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: DesignSystem.spacing8),
+                    Text(
+                      '${turfs.length} venues found',
+                      style: DesignSystem.bodyMedium.copyWith(
+                        color: palette.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: DesignSystem.spacing16),
+                    Expanded(
+                      child: ListView.separated(
+                        itemCount: turfs.length,
+                        separatorBuilder: (_, __) =>
+                            const SizedBox(height: DesignSystem.spacing12),
+                        itemBuilder: (context, index) {
+                          final turf = turfs[index];
+                          return _VenueListTile(
+                            turf: turf,
+                            onTap: () {
+                              Navigator.pop(context);
+                              _openTurfDetails(turf);
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final turfState = ref.watch(turfControllerProvider);
+    final palette = DesignSystem.paletteOf(context);
 
-    return Scaffold(
+    return PremiumScaffold(
       extendBody: true,
-      backgroundColor: const Color(0xFFF7F5F2),
       body: SafeArea(
         child: turfState.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => _ErrorState(
+          error: (error, stack) => _HomeErrorState(
             error: error.toString(),
             onRetry: _refreshTurfs,
           ),
           data: (turfs) {
-            final allTurfs = List<Map<String, dynamic>>.from(turfs);
-            final filteredTurfs = _applyFilters(allTurfs);
-            final recommendedTurfs = filteredTurfs.take(6).toList();
-            final nearbyTurfs =
-                filteredTurfs.skip(min(2, filteredTurfs.length)).toList();
-            final displayedNearby = nearbyTurfs.isEmpty ? filteredTurfs : nearbyTurfs;
+            final filteredTurfs = _applyFilters(List<Map<String, dynamic>>.from(turfs));
+            final featuredTurfs = filteredTurfs.take(5).toList();
+            final nearbyTurfs = filteredTurfs.skip(1).take(6).toList();
 
             return RefreshIndicator(
               onRefresh: _refreshTurfs,
-              color: const Color(0xFF111111),
+              color: palette.primary,
               child: CustomScrollView(
                 physics: const BouncingScrollPhysics(
                   parent: AlwaysScrollableScrollPhysics(),
                 ),
                 slivers: [
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 10, 24, 120),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildHeader(),
-                          const SizedBox(height: 28),
-                          _buildSearchRow(),
-                          const SizedBox(height: 22),
-                          _buildCategoryRow(),
-                          const SizedBox(height: 30),
-                          _buildSectionHeader(
-                            title: 'Recommend for You',
-                            onTap: () {},
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 140),
+                    sliver: SliverList(
+                      delegate: SliverChildListDelegate([
+                        _HeaderBar(
+                          onBookingsTap: _openBookings,
+                        ),
+                        const SizedBox(height: DesignSystem.spacing20),
+                        _SearchBar(
+                          controller: _searchController,
+                          onFilterTap: () {
+                            _showMessage(
+                              'Use the sport chips below to refine results.',
+                            );
+                          },
+                        ),
+                        const SizedBox(height: DesignSystem.spacing20),
+                        SizedBox(
+                          height: 120,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: _sportsCategories.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(width: DesignSystem.spacing12),
+                            itemBuilder: (context, index) {
+                              final category = _sportsCategories[index];
+                              return _SportCategoryChip(
+                                category: category,
+                                isSelected: _selectedCategoryIndex == index,
+                                onTap: () {
+                                  setState(() => _selectedCategoryIndex = index);
+                                },
+                              );
+                            },
                           ),
-                          const SizedBox(height: 14),
-                          if (recommendedTurfs.isEmpty)
-                            _buildEmptyState(
-                              message: _searchController.text.isEmpty
-                                  ? 'No turfs available right now.'
-                                  : 'No turfs match this search yet.',
-                            )
-                          else
-                            SizedBox(
-                              height: 350,
-                              child: ListView.separated(
-                                clipBehavior: Clip.none,
-                                scrollDirection: Axis.horizontal,
-                                physics: const BouncingScrollPhysics(),
-                                itemCount: recommendedTurfs.length,
-                                separatorBuilder: (_, __) => const SizedBox(width: 16),
-                                itemBuilder: (context, index) {
-                                  final turf = recommendedTurfs[index];
-                                  return _RecommendedTurfCard(
+                        ),
+                        const SizedBox(height: DesignSystem.spacing28),
+                        _SectionHeader(
+                          title: 'Recommended for you',
+                          subtitle: 'Curated venues based on the sport you picked.',
+                          onTap: featuredTurfs.isEmpty
+                              ? null
+                              : () => _showAllTurfsSheet(
+                                    'Recommended venues',
+                                    featuredTurfs,
+                                  ),
+                        ),
+                        const SizedBox(height: DesignSystem.spacing16),
+                        if (featuredTurfs.isEmpty)
+                          const PremiumEmptyState(
+                            title: 'No matching venues',
+                            message:
+                                'Try another sport or clear the current search to view more venues.',
+                          )
+                        else
+                          SizedBox(
+                            height: 320,
+                            child: ListView.separated(
+                              scrollDirection: Axis.horizontal,
+                              clipBehavior: Clip.none,
+                              itemCount: featuredTurfs.length,
+                              separatorBuilder: (_, __) =>
+                                  const SizedBox(width: DesignSystem.spacing16),
+                              itemBuilder: (context, index) {
+                                final turf = featuredTurfs[index];
+                                return SizedBox(
+                                  width: 286,
+                                  child: _FeaturedVenueCard(
                                     turf: turf,
-                                    isFavorite: _favoriteIds.contains('${turf['id']}'),
-                                    onFavoriteToggle: () => _toggleFavorite(turf['id']),
+                                    isFavorite:
+                                        _favoriteIds.contains('${turf['id']}'),
+                                    onFavoriteTap: () =>
+                                        _toggleFavorite(turf['id']),
                                     onTap: () => _openTurfDetails(turf),
-                                  );
-                                },
-                              ),
+                                  ),
+                                );
+                              },
                             ),
-                          const SizedBox(height: 26),
-                          _buildSectionHeader(
-                            title: 'Popular nearby',
-                            onTap: () {},
                           ),
-                          const SizedBox(height: 14),
-                          if (filteredTurfs.isEmpty)
-                            _buildEmptyState(
-                              message: 'Try another sport or clear the search.',
-                            )
-                          else
-                            SizedBox(
-                              height: 284,
-                              child: ListView.separated(
-                                clipBehavior: Clip.none,
-                                scrollDirection: Axis.horizontal,
-                                physics: const BouncingScrollPhysics(),
-                                itemCount: displayedNearby.length,
-                                separatorBuilder: (_, __) => const SizedBox(width: 16),
-                                itemBuilder: (context, index) {
-                                  final turf = displayedNearby[index];
-                                  return SizedBox(
-                                    width: 214,
-                                    child: _NearbyTurfCard(
-                                      turf: turf,
-                                      isFavorite: _favoriteIds.contains('${turf['id']}'),
-                                      onFavoriteToggle: () =>
-                                          _toggleFavorite(turf['id']),
-                                      onTap: () => _openTurfDetails(turf),
-                                    ),
-                                  );
-                                },
+                        const SizedBox(height: DesignSystem.spacing28),
+                        _SectionHeader(
+                          title: 'Nearby venues',
+                          subtitle: 'Clean, fast access to courts and pricing.',
+                          onTap: nearbyTurfs.isEmpty
+                              ? null
+                              : () => _showAllTurfsSheet(
+                                    'Nearby venues',
+                                    nearbyTurfs,
+                                  ),
+                        ),
+                        const SizedBox(height: DesignSystem.spacing16),
+                        if (nearbyTurfs.isEmpty)
+                          PremiumEmptyState(
+                            title: 'No nearby venues yet',
+                            message:
+                                'Once more venues are available in this category, they will appear here.',
+                            action: SizedBox(
+                              width: 180,
+                              child: GlowButton(
+                                label: 'View bookings',
+                                onPressed: _openBookings,
                               ),
                             ),
-                        ],
-                      ),
+                          )
+                        else
+                          ...nearbyTurfs.map(
+                            (turf) => Padding(
+                              padding:
+                                  const EdgeInsets.only(bottom: DesignSystem.spacing16),
+                              child: _VenueListTile(
+                                turf: turf,
+                                isFavorite:
+                                    _favoriteIds.contains('${turf['id']}'),
+                                onFavoriteTap: () =>
+                                    _toggleFavorite(turf['id']),
+                                onTap: () => _openTurfDetails(turf),
+                              ),
+                            ),
+                          ),
+                      ]),
                     ),
                   ),
                 ],
@@ -270,8 +410,8 @@ class _UserHomeScreenState extends ConsumerState<UserHomeScreen> {
         ),
       ),
       bottomNavigationBar: SafeArea(
-        minimum: const EdgeInsets.fromLTRB(18, 0, 18, 18),
-        child: _LiquidGlassNavBar(
+        minimum: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        child: _HomeNavigationBar(
           selectedIndex: _selectedNavIndex,
           items: _navItems,
           onTap: _onNavTapped,
@@ -279,582 +419,169 @@ class _UserHomeScreenState extends ConsumerState<UserHomeScreen> {
       ),
     );
   }
+}
 
-  Widget _buildHeader() {
+class _HeaderBar extends StatelessWidget {
+  const _HeaderBar({
+    required this.onBookingsTap,
+  });
+
+  final VoidCallback onBookingsTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = DesignSystem.paletteOf(context);
+
     return Row(
       children: [
         Container(
-          width: 48,
-          height: 48,
+          width: 56,
+          height: 56,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Colors.white,
+            border: Border.all(color: palette.glassBorder),
+            boxShadow: DesignSystem.shadowSmallFor(context),
             image: const DecorationImage(
               image: NetworkImage('https://i.pravatar.cc/120?img=12'),
               fit: BoxFit.cover,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 18,
-                offset: const Offset(0, 8),
-              ),
-            ],
           ),
         ),
-        const SizedBox(width: 14),
-        const Expanded(
+        const SizedBox(width: DesignSystem.spacing16),
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'Evan',
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF202020),
+                style: DesignSystem.headline4.copyWith(
+                  color: palette.textPrimary,
                 ),
               ),
-              SizedBox(height: 2),
+              const SizedBox(height: DesignSystem.spacing4),
               Text(
-                'Welcome back !',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Color(0xFF9D9D9D),
+                'Welcome back. Find your next game fast.',
+                style: DesignSystem.bodyMedium.copyWith(
+                  color: palette.textSecondary,
                 ),
               ),
             ],
           ),
         ),
-        _GlassIconButton(
-          icon: Icons.notifications_none_rounded,
-          onTap: _openBookings,
+        const ThemeDropdown(),
+        const SizedBox(width: DesignSystem.spacing8),
+        _HeaderIconButton(
+          icon: Icons.event_available_rounded,
+          onTap: onBookingsTap,
         ),
       ],
     );
   }
+}
 
-  Widget _buildSearchRow() {
+class _SearchBar extends StatelessWidget {
+  const _SearchBar({
+    required this.controller,
+    required this.onFilterTap,
+  });
+
+  final TextEditingController controller;
+  final VoidCallback onFilterTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = DesignSystem.paletteOf(context);
+
     return Row(
       children: [
         Expanded(
-          child: ClipRRect(
+          child: GlassCard(
+            padding: EdgeInsets.zero,
             borderRadius: BorderRadius.circular(24),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-              child: TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: 'Search',
-                  hintStyle: const TextStyle(
-                    color: Color(0xFF9B9B9B),
-                    fontSize: 16,
-                  ),
-                  prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF9B9B9B)),
-                  filled: true,
-                  fillColor: Colors.white.withOpacity(0.8),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 16),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(24),
-                    borderSide: BorderSide(color: Colors.white.withOpacity(0.95)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(24),
-                    borderSide: const BorderSide(color: Color(0x33000000), width: 1),
-                  ),
-                ),
+            child: TextField(
+              controller: controller,
+              style: DesignSystem.bodyLarge.copyWith(color: palette.textPrimary),
+              decoration: InputDecoration(
+                hintText: 'Search venues, locations, or sports',
+                hintStyle:
+                    DesignSystem.bodyMedium.copyWith(color: palette.textMuted),
+                prefixIcon: Icon(Icons.search_rounded, color: palette.textSecondary),
+                contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                filled: false,
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
               ),
             ),
           ),
         ),
-        const SizedBox(width: 12),
-        _GlassIconButton(
-          icon: Icons.filter_alt_outlined,
-          onTap: () {},
+        const SizedBox(width: DesignSystem.spacing12),
+        _HeaderIconButton(
+          icon: Icons.tune_rounded,
+          onTap: onFilterTap,
         ),
       ],
     );
   }
-
-  Widget _buildCategoryRow() {
-    return SizedBox(
-      height: 106,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        itemCount: _sportsCategories.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
-        itemBuilder: (context, index) {
-          final category = _sportsCategories[index];
-          final isActive = index == _selectedCategoryIndex;
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                _selectedCategoryIndex = index;
-              });
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 240),
-              width: 88,
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Container(
-                        width: 52,
-                        height: 40,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.45),
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                        child: Icon(
-                          category.icon,
-                          size: 30,
-                          color: const Color(0xFF404040),
-                        ),
-                      ),
-                      if (index == 1 || index == 2)
-                        Positioned(
-                          top: -4,
-                          right: -10,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(999),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.05),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: const Text(
-                              'New',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Color(0xFF575757),
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    category.label,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: isActive
-                          ? const Color(0xFF1B1B1B)
-                          : const Color(0xFF8E8E8E),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 240),
-                    height: 3.4,
-                    width: isActive ? 78 : 0,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1B1B1B),
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader({
-    required String title,
-    required VoidCallback onTap,
-  }) {
-    return Row(
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF222222),
-          ),
-        ),
-        const Spacer(),
-        IconButton(
-          onPressed: onTap,
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(),
-          icon: const Icon(
-            Icons.arrow_forward_ios_rounded,
-            size: 18,
-            color: Color(0xFF202020),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildEmptyState({required String message}) {
-    return _GlassCard(
-      borderRadius: BorderRadius.circular(28),
-      padding: const EdgeInsets.all(18),
-      child: Row(
-        children: [
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              color: const Color(0xFF6C4CF1).withOpacity(0.12),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.sports_soccer_rounded, color: Color(0xFF6C4CF1)),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Text(
-              message,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Color(0xFF6B7280),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
-class _RecommendedTurfCard extends StatelessWidget {
-  const _RecommendedTurfCard({
-    required this.turf,
-    required this.isFavorite,
-    required this.onFavoriteToggle,
+class _SportCategoryChip extends StatelessWidget {
+  const _SportCategoryChip({
+    required this.category,
+    required this.isSelected,
     required this.onTap,
   });
 
-  final Map<String, dynamic> turf;
-  final bool isFavorite;
-  final VoidCallback onFavoriteToggle;
+  final _SportCategory category;
+  final bool isSelected;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final imageUrl = (turf['image_url'] ?? '').toString();
-    final price = turf['price_per_hour'] ?? 0;
+    final palette = DesignSystem.paletteOf(context);
 
     return GestureDetector(
       onTap: onTap,
-      child: SizedBox(
-        width: 268,
-        child: _GlassCard(
-          borderRadius: BorderRadius.circular(30),
-          padding: const EdgeInsets.all(10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(28),
-                child: SizedBox(
-                  height: 196,
-                  width: double.infinity,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      _TurfImage(imageUrl: imageUrl, icon: _sportIconForTurf(turf)),
-                      Positioned(
-                        top: 12,
-                        left: 12,
-                        child: _CircleOverlayButton(
-                          icon: isFavorite
-                              ? Icons.favorite_rounded
-                              : Icons.favorite_border_rounded,
-                          iconColor: isFavorite
-                              ? const Color(0xFF202020)
-                              : const Color(0xFF919191),
-                          onTap: onFavoriteToggle,
-                        ),
-                      ),
-                      Positioned(
-                        top: 12,
-                        right: 12,
-                        child: Container(
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.82),
-                            borderRadius: BorderRadius.circular(999),
-                            border: Border.all(color: Colors.white.withOpacity(0.92)),
-                          ),
-                          child: Text(
-                            _sportLabelForTurf(turf),
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: Color(0xFF505050),
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 14),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            turf['name'] ?? '',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF202020),
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.location_on_outlined,
-                                size: 14,
-                                color: Color(0xFF979797),
-                              ),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                child: Text(
-                                  _locationText(turf),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    color: Color(0xFF909090),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Row(
-                      children: [
-                        const Icon(Icons.star_rounded, size: 15, color: Color(0xFF202020)),
-                        const SizedBox(width: 3),
-                        Text(
-                          _ratingForTurf(turf),
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Color(0xFF232323),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Rs ${_formatPrice(price)}',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF212121),
-                        ),
-                      ),
-                    ),
-                    _ActionChip(
-                      label: 'View details',
-                      onTap: onTap,
-                    ),
-                    const SizedBox(width: 10),
-                    InkWell(
-                      onTap: onTap,
-                      borderRadius: BorderRadius.circular(999),
-                      child: Container(
-                        width: 42,
-                        height: 42,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Color(0xFF1F1F1F),
-                        ),
-                        child: const Icon(
-                          Icons.arrow_outward_rounded,
-                          size: 18,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+      child: AnimatedContainer(
+        duration: DesignSystem.animationFast,
+        width: 96,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? palette.overlayStrong
+              : palette.surfaceGlass.withValues(alpha: 0.88),
+          borderRadius: DesignSystem.borderRadiusXLarge,
+          border: Border.all(
+            color: isSelected ? palette.primary : palette.glassBorder,
           ),
+          boxShadow: DesignSystem.shadowSmallFor(context),
         ),
-      ),
-    );
-  }
-}
-
-class _NearbyTurfCard extends StatelessWidget {
-  const _NearbyTurfCard({
-    required this.turf,
-    required this.isFavorite,
-    required this.onFavoriteToggle,
-    required this.onTap,
-  });
-
-  final Map<String, dynamic> turf;
-  final bool isFavorite;
-  final VoidCallback onFavoriteToggle;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final imageUrl = (turf['image_url'] ?? '').toString();
-    final price = turf['price_per_hour'] ?? 0;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: _GlassCard(
-        borderRadius: BorderRadius.circular(28),
-        padding: const EdgeInsets.all(10),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(26),
-              child: SizedBox(
-                height: 150,
-                width: double.infinity,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    _TurfImage(imageUrl: imageUrl, icon: _sportIconForTurf(turf)),
-                    Positioned(
-                      top: 10,
-                      left: 10,
-                      child: _CircleOverlayButton(
-                        icon: isFavorite
-                            ? Icons.favorite_rounded
-                            : Icons.favorite_border_rounded,
-                        iconColor: isFavorite
-                            ? const Color(0xFF202020)
-                            : const Color(0xFF919191),
-                        onTap: onFavoriteToggle,
-                      ),
-                    ),
-                    Positioned(
-                      top: 10,
-                      right: 10,
-                      child: Container(
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.82),
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Text(
-                          _sportLabelForTurf(turf),
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: Color(0xFF4F4F4F),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isSelected ? palette.primary : palette.backgroundSecondary,
+              ),
+              child: Icon(
+                category.icon,
+                color: isSelected ? palette.textWhite : palette.primary,
               ),
             ),
-            const SizedBox(height: 14),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              child: Text(
-                turf['name'] ?? '',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF202020),
-                ),
-              ),
-            ),
-            const SizedBox(height: 6),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              child: Text(
-                _locationText(turf),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Color(0xFF909090),
-                ),
-              ),
-            ),
-            const Spacer(),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              child: Row(
-                children: [
-                  Text(
-                    'Rs ${_formatPrice(price)}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF212121),
-                    ),
-                  ),
-                  const Spacer(),
-                  const Icon(Icons.star_rounded, size: 15, color: Color(0xFF202020)),
-                  const SizedBox(width: 4),
-                  Text(
-                    _ratingForTurf(turf),
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Color(0xFF2A2A2A),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 4),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              child: Text(
-                _distanceForTurf(turf),
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF9A9A9A),
-                ),
+            const SizedBox(height: DesignSystem.spacing8),
+            Text(
+              category.label,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: DesignSystem.bodyMedium.copyWith(
+                color: isSelected ? palette.textPrimary : palette.textSecondary,
+                fontWeight: isSelected
+                    ? DesignSystem.fontWeightSemiBold
+                    : DesignSystem.fontWeightMedium,
               ),
             ),
           ],
@@ -864,8 +591,271 @@ class _NearbyTurfCard extends StatelessWidget {
   }
 }
 
-class _LiquidGlassNavBar extends StatelessWidget {
-  const _LiquidGlassNavBar({
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({
+    required this.title,
+    required this.subtitle,
+    this.onTap,
+  });
+
+  final String title;
+  final String subtitle;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = DesignSystem.paletteOf(context);
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: DesignSystem.headline4.copyWith(color: palette.textPrimary),
+              ),
+              const SizedBox(height: DesignSystem.spacing4),
+              Text(
+                subtitle,
+                style: DesignSystem.bodyMedium.copyWith(
+                  color: palette.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: DesignSystem.spacing12),
+        IconButton(
+          onPressed: onTap,
+          icon: Icon(
+            Icons.arrow_forward_rounded,
+            color: onTap == null ? palette.textMuted : palette.primary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _FeaturedVenueCard extends StatelessWidget {
+  const _FeaturedVenueCard({
+    required this.turf,
+    required this.isFavorite,
+    required this.onFavoriteTap,
+    required this.onTap,
+  });
+
+  final Map<String, dynamic> turf;
+  final bool isFavorite;
+  final VoidCallback onFavoriteTap;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = DesignSystem.paletteOf(context);
+    final imageUrl = (turf['image_url'] ?? '').toString();
+    final price = turf['price_per_hour'] ?? 0;
+
+    return GlassCard(
+      borderRadius: DesignSystem.borderRadiusXLarge,
+      padding: const EdgeInsets.all(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: DesignSystem.borderRadiusXLarge,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: DesignSystem.borderRadiusLarge,
+              child: SizedBox(
+                height: 168,
+                width: double.infinity,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    _VenueImage(imageUrl: imageUrl, icon: _sportIconForTurf(turf)),
+                    Positioned(
+                      left: 10,
+                      top: 10,
+                      child: _FavoriteBadge(
+                        isFavorite: isFavorite,
+                        onTap: onFavoriteTap,
+                      ),
+                    ),
+                    Positioned(
+                      right: 10,
+                      top: 10,
+                      child: _PillLabel(text: _sportLabelForTurf(turf)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: DesignSystem.spacing16),
+            Text(
+              turf['name'] ?? 'Unnamed turf',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: DesignSystem.headline5.copyWith(color: palette.textPrimary),
+            ),
+            const SizedBox(height: DesignSystem.spacing6),
+            Text(
+              _locationText(turf),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: DesignSystem.bodyMedium.copyWith(
+                color: palette.textSecondary,
+              ),
+            ),
+            const Spacer(),
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Rs ${_formatPrice(price)}',
+                        style: DesignSystem.headline4.copyWith(
+                          color: palette.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: DesignSystem.spacing4),
+                      Text(
+                        _distanceForTurf(turf),
+                        style: DesignSystem.bodySmall.copyWith(
+                          color: palette.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: DesignSystem.spacing12),
+                SizedBox(
+                  width: 118,
+                  child: GlowButton(
+                    label: 'View',
+                    onPressed: onTap,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _VenueListTile extends StatelessWidget {
+  const _VenueListTile({
+    required this.turf,
+    required this.onTap,
+    this.isFavorite = false,
+    this.onFavoriteTap,
+  });
+
+  final Map<String, dynamic> turf;
+  final VoidCallback onTap;
+  final bool isFavorite;
+  final VoidCallback? onFavoriteTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = DesignSystem.paletteOf(context);
+    final imageUrl = (turf['image_url'] ?? '').toString();
+
+    return GlassCard(
+      padding: const EdgeInsets.all(12),
+      borderRadius: DesignSystem.borderRadiusLarge,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: DesignSystem.borderRadiusLarge,
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: DesignSystem.borderRadiusMedium,
+              child: SizedBox(
+                width: 92,
+                height: 92,
+                child: _VenueImage(
+                  imageUrl: imageUrl,
+                  icon: _sportIconForTurf(turf),
+                ),
+              ),
+            ),
+            const SizedBox(width: DesignSystem.spacing12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    turf['name'] ?? 'Unnamed turf',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: DesignSystem.headline5.copyWith(
+                      color: palette.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: DesignSystem.spacing6),
+                  Text(
+                    _locationText(turf),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: DesignSystem.bodyMedium.copyWith(
+                      color: palette.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: DesignSystem.spacing8),
+                  Wrap(
+                    spacing: DesignSystem.spacing8,
+                    runSpacing: DesignSystem.spacing8,
+                    children: [
+                      _MetaBadge(
+                        icon: Icons.currency_rupee_rounded,
+                        text: _formatPrice(turf['price_per_hour'] ?? 0),
+                      ),
+                      _MetaBadge(
+                        icon: Icons.star_rounded,
+                        text: _ratingForTurf(turf),
+                      ),
+                      _MetaBadge(
+                        icon: Icons.route_rounded,
+                        text: _distanceForTurf(turf),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: DesignSystem.spacing8),
+            Column(
+              children: [
+                if (onFavoriteTap != null)
+                  _FavoriteBadge(
+                    isFavorite: isFavorite,
+                    onTap: onFavoriteTap!,
+                    small: true,
+                  ),
+                const SizedBox(height: DesignSystem.spacing8),
+                Icon(
+                  Icons.arrow_forward_rounded,
+                  color: palette.primary,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HomeNavigationBar extends StatelessWidget {
+  const _HomeNavigationBar({
     required this.selectedIndex,
     required this.items,
     required this.onTap,
@@ -877,307 +867,183 @@ class _LiquidGlassNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
+    final palette = DesignSystem.paletteOf(context);
+
+    return GlassCard(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       borderRadius: BorderRadius.circular(30),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(30),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white.withOpacity(0.62),
-                Colors.white.withOpacity(0.34),
-              ],
-            ),
-            border: Border.all(color: Colors.white.withOpacity(0.55)),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF6C4CF1).withOpacity(0.14),
-                blurRadius: 24,
-                offset: const Offset(0, 12),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: List.generate(items.length, (index) {
-              final item = items[index];
-              final isSelected = index == selectedIndex;
-              return Expanded(
-                child: GestureDetector(
-                  onTap: () => onTap(index),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 220),
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(22),
-                      color: isSelected
-                          ? const Color(0xFF6C4CF1).withOpacity(0.16)
-                          : Colors.transparent,
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          item.icon,
-                          size: 20,
-                          color: isSelected
-                              ? const Color(0xFF6C4CF1)
-                              : const Color(0xFF6B7280),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          item.label,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                            color: isSelected
-                                ? const Color(0xFF6C4CF1)
-                                : const Color(0xFF6B7280),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+      child: Row(
+        children: List.generate(items.length, (index) {
+          final item = items[index];
+          final isSelected = index == selectedIndex;
+
+          return Expanded(
+            child: GestureDetector(
+              onTap: () => onTap(index),
+              child: AnimatedContainer(
+                duration: DesignSystem.animationFast,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+                decoration: BoxDecoration(
+                  color: isSelected ? palette.overlayStrong : Colors.transparent,
+                  borderRadius: BorderRadius.circular(22),
                 ),
-              );
-            }),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _GlassCard extends StatelessWidget {
-  const _GlassCard({
-    required this.child,
-    required this.borderRadius,
-    this.padding = EdgeInsets.zero,
-  });
-
-  final Widget child;
-  final BorderRadius borderRadius;
-  final EdgeInsets padding;
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: borderRadius,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-        child: Container(
-          padding: padding,
-          decoration: BoxDecoration(
-            borderRadius: borderRadius,
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white.withOpacity(0.62),
-                Colors.white.withOpacity(0.28),
-              ],
-            ),
-            border: Border.all(color: Colors.white.withOpacity(0.55)),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF6C4CF1).withOpacity(0.08),
-                blurRadius: 24,
-                offset: const Offset(0, 12),
-              ),
-            ],
-          ),
-          child: child,
-        ),
-      ),
-    );
-  }
-}
-
-class _GlassIconButton extends StatelessWidget {
-  const _GlassIconButton({
-    required this.icon,
-    required this.onTap,
-    this.label,
-  });
-
-  final IconData icon;
-  final VoidCallback onTap;
-  final String? label;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-          child: Container(
-            height: 46,
-            padding: EdgeInsets.symmetric(horizontal: label == null ? 0 : 14),
-            constraints: BoxConstraints(minWidth: label == null ? 46 : 72),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.52),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white.withOpacity(0.6)),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon, size: 20, color: const Color(0xFF6C4CF1)),
-                if (label != null) ...[
-                  const SizedBox(width: 6),
-                  Text(
-                    label!,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF6C4CF1),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      item.icon,
+                      size: 20,
+                      color: isSelected ? palette.primary : palette.textMuted,
                     ),
-                  ),
-                ],
-              ],
+                    const SizedBox(height: DesignSystem.spacing4),
+                    Text(
+                      item.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: DesignSystem.bodySmall.copyWith(
+                        color:
+                            isSelected ? palette.primary : palette.textSecondary,
+                        fontWeight: isSelected
+                            ? DesignSystem.fontWeightSemiBold
+                            : DesignSystem.fontWeightMedium,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ),
+          );
+        }),
       ),
     );
   }
 }
 
-class _CircleOverlayButton extends StatelessWidget {
-  const _CircleOverlayButton({
+class _HeaderIconButton extends StatelessWidget {
+  const _HeaderIconButton({
     required this.icon,
-    required this.iconColor,
     required this.onTap,
   });
 
   final IconData icon;
-  final Color iconColor;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 34,
-        height: 34,
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.78),
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white.withOpacity(0.92)),
-        ),
-        child: Icon(icon, size: 18, color: iconColor),
-      ),
-    );
-  }
-}
+    final palette = DesignSystem.paletteOf(context);
 
-class _ActionChip extends StatelessWidget {
-  const _ActionChip({
-    required this.label,
-    required this.onTap,
-  });
-
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(999),
+      borderRadius: BorderRadius.circular(18),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+        width: 46,
+        height: 46,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.88),
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: Colors.white.withOpacity(0.96)),
+          color: palette.surfaceGlass,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: palette.glassBorder),
+          boxShadow: DesignSystem.shadowSmallFor(context),
         ),
-        child: Text(
-          label,
-          style: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color: Color(0xFF3A3A3A),
-          ),
-        ),
+        child: Icon(icon, color: palette.primary, size: 20),
       ),
     );
   }
 }
 
-class _FavoriteButton extends StatelessWidget {
-  const _FavoriteButton({
+class _FavoriteBadge extends StatelessWidget {
+  const _FavoriteBadge({
     required this.isFavorite,
     required this.onTap,
+    this.small = false,
   });
 
   final bool isFavorite;
   final VoidCallback onTap;
+  final bool small;
 
   @override
   Widget build(BuildContext context) {
+    final palette = DesignSystem.paletteOf(context);
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 34,
-        height: 34,
+        width: small ? 34 : 40,
+        height: small ? 34 : 40,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.22),
+          color: palette.surfaceGlass,
           shape: BoxShape.circle,
-          border: Border.all(color: Colors.white.withOpacity(0.28)),
+          border: Border.all(color: palette.glassBorder),
         ),
         child: Icon(
           isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-          size: 18,
-          color: isFavorite ? const Color(0xFFFF6B81) : Colors.white,
+          size: small ? 18 : 20,
+          color: isFavorite ? palette.error : palette.textSecondary,
         ),
       ),
     );
   }
 }
 
-class _InfoPill extends StatelessWidget {
-  const _InfoPill({
+class _PillLabel extends StatelessWidget {
+  const _PillLabel({
+    required this.text,
+  });
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = DesignSystem.paletteOf(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: palette.surfaceGlass,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: palette.glassBorder),
+      ),
+      child: Text(
+        text,
+        style: DesignSystem.bodySmall.copyWith(
+          color: palette.textPrimary,
+          fontWeight: DesignSystem.fontWeightSemiBold,
+        ),
+      ),
+    );
+  }
+}
+
+class _MetaBadge extends StatelessWidget {
+  const _MetaBadge({
     required this.icon,
     required this.text,
-    required this.color,
   });
 
   final IconData icon;
   final String text;
-  final Color color;
 
   @override
   Widget build(BuildContext context) {
+    final palette = DesignSystem.paletteOf(context);
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(14),
+        color: palette.overlaySoft,
+        borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: color),
-          const SizedBox(width: 6),
-          Flexible(
-            child: Text(
-              text,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: color,
-              ),
+          Icon(icon, size: 14, color: palette.primary),
+          const SizedBox(width: DesignSystem.spacing6),
+          Text(
+            text,
+            style: DesignSystem.bodySmall.copyWith(
+              color: palette.textPrimary,
+              fontWeight: DesignSystem.fontWeightSemiBold,
             ),
           ),
         ],
@@ -1186,8 +1052,8 @@ class _InfoPill extends StatelessWidget {
   }
 }
 
-class _TurfImage extends StatelessWidget {
-  const _TurfImage({
+class _VenueImage extends StatelessWidget {
+  const _VenueImage({
     required this.imageUrl,
     required this.icon,
   });
@@ -1197,19 +1063,12 @@ class _TurfImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = DesignSystem.paletteOf(context);
+
     if (imageUrl.isEmpty) {
-      return Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFFA78BFA),
-              Color(0xFF6C4CF1),
-            ],
-          ),
-        ),
-        child: Icon(icon, size: 42, color: Colors.white),
+      return DecoratedBox(
+        decoration: BoxDecoration(gradient: palette.primaryGradient),
+        child: Icon(icon, size: 44, color: palette.textWhite),
       );
     }
 
@@ -1217,26 +1076,17 @@ class _TurfImage extends StatelessWidget {
       imageUrl,
       fit: BoxFit.cover,
       errorBuilder: (_, __, ___) {
-        return Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color(0xFFA78BFA),
-                Color(0xFF6C4CF1),
-              ],
-            ),
-          ),
-          child: Icon(icon, size: 42, color: Colors.white),
+        return DecoratedBox(
+          decoration: BoxDecoration(gradient: palette.primaryGradient),
+          child: Icon(icon, size: 44, color: palette.textWhite),
         );
       },
     );
   }
 }
 
-class _ErrorState extends StatelessWidget {
-  const _ErrorState({
+class _HomeErrorState extends StatelessWidget {
+  const _HomeErrorState({
     required this.error,
     required this.onRetry,
   });
@@ -1246,69 +1096,19 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: _GlassCard(
-          borderRadius: BorderRadius.circular(30),
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.cloud_off_rounded, size: 44, color: Color(0xFF6C4CF1)),
-              const SizedBox(height: 14),
-              const Text(
-                'Failed to load turfs',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF1F2937),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                error,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Color(0xFF6B7280),
-                ),
-              ),
-              const SizedBox(height: 18),
-              ElevatedButton(
-                onPressed: onRetry,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF6C4CF1),
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Retry'),
-              ),
-            ],
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: PremiumEmptyState(
+        title: 'Unable to load venues',
+        message: error,
+        action: SizedBox(
+          width: 180,
+          child: GlowButton(
+            label: 'Retry',
+            onPressed: () {
+              onRetry();
+            },
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _GlowOrb extends StatelessWidget {
-  const _GlowOrb({
-    required this.size,
-    required this.colors,
-  });
-
-  final double size;
-  final List<Color> colors;
-
-  @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: RadialGradient(colors: colors),
         ),
       ),
     );
@@ -1354,7 +1154,7 @@ String _sportLabelForTurf(Map<String, dynamic> turf) {
 }
 
 String _ratingForTurf(Map<String, dynamic> turf) {
-  final dynamic raw = turf['rating'];
+  final raw = turf['rating'];
   if (raw is num) {
     return raw.toStringAsFixed(1);
   }
@@ -1365,7 +1165,7 @@ String _ratingForTurf(Map<String, dynamic> turf) {
 }
 
 String _distanceForTurf(Map<String, dynamic> turf) {
-  final dynamic raw = turf['distance'];
+  final raw = turf['distance'];
   if (raw != null && raw.toString().trim().isNotEmpty) {
     return raw.toString();
   }

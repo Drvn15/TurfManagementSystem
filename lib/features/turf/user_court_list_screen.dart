@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../core/api/api_client.dart';
-import '../../core/theme/app_theme.dart';
+import '../../core/theme/design_system.dart';
+import '../../core/widgets/premium_widgets.dart';
 import '../booking/slot_selection_screen.dart';
 
 class UserCourtListScreen extends ConsumerStatefulWidget {
-  final Map<String, dynamic> sport;
-  final String turfName;
-
   const UserCourtListScreen({
     super.key,
     required this.sport,
     required this.turfName,
   });
+
+  final Map<String, dynamic> sport;
+  final String turfName;
 
   @override
   ConsumerState<UserCourtListScreen> createState() => _UserCourtListScreenState();
@@ -31,31 +33,26 @@ class _UserCourtListScreenState extends ConsumerState<UserCourtListScreen> {
 
   void _fetchCourts() {
     setState(() {
+      _errorMessage = null;
       _courtsFuture = _api.get("/courts/${widget.sport['id']}").then((response) {
-        if (response is List) {
-          return response;
-        }
-        return [];
+        return response is List ? response : <dynamic>[];
       }).catchError((error) {
-        setState(() {
-          _errorMessage = error.toString();
-        });
-        return [];
+        _errorMessage = error.toString();
+        return <dynamic>[];
       });
     });
   }
 
   String _formatTime(String? time) {
     if (time == null || time.isEmpty) return 'Not set';
-    if (time.length >= 5) {
-      return time.substring(0, 5);
-    }
-    return time;
+    return time.length >= 5 ? time.substring(0, 5) : time;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final palette = DesignSystem.paletteOf(context);
+
+    return PremiumScaffold(
       appBar: AppBar(
         title: Text('${widget.sport['name']} Courts'),
       ),
@@ -67,150 +64,124 @@ class _UserCourtListScreenState extends ConsumerState<UserCourtListScreen> {
           }
 
           if (snapshot.hasError || _errorMessage != null) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Error loading courts',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    _errorMessage ?? snapshot.error.toString(),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.grey),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
+            return Padding(
+              padding: DesignSystem.paddingAll24,
+              child: PremiumEmptyState(
+                title: 'Unable to load courts',
+                message: _errorMessage ?? snapshot.error.toString(),
+                action: SizedBox(
+                  width: 170,
+                  child: GlowButton(
+                    label: 'Retry',
                     onPressed: _fetchCourts,
-                    child: const Text('Retry'),
                   ),
-                ],
+                ),
               ),
             );
           }
 
           final courts = snapshot.data ?? [];
-
           if (courts.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.sports_tennis, size: 64, color: Colors.grey),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No courts available',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'This sport hasn\'t been configured with courts yet',
-                    style: TextStyle(color: Colors.grey),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+            return const Padding(
+              padding: DesignSystem.paddingAll24,
+              child: PremiumEmptyState(
+                title: 'No courts available',
+                message:
+                    'This sport has not been configured with playable courts yet.',
               ),
             );
           }
 
           return ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
             itemCount: courts.length,
             itemBuilder: (context, index) {
               final court = courts[index];
-              return Card(
-                margin: const EdgeInsets.only(bottom: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                elevation: 2,
-                child: InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => SlotSelectionScreen(
-                          court: court,
-                          turfName: widget.turfName,
-                          sportName: widget.sport['name'],
+              return Padding(
+                padding: const EdgeInsets.only(bottom: DesignSystem.spacing16),
+                child: GlassCard(
+                  padding: const EdgeInsets.all(16),
+                  borderRadius: DesignSystem.borderRadiusLarge,
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => SlotSelectionScreen(
+                            court: court,
+                            turfName: widget.turfName,
+                            sportName: widget.sport['name'] ?? 'Sport',
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                  borderRadius: BorderRadius.circular(16),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
+                      );
+                    },
+                    borderRadius: DesignSystem.borderRadiusLarge,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Expanded(
                               child: Text(
                                 court['name'] ?? 'Court',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
+                                style: DesignSystem.headline5.copyWith(
+                                  color: palette.textPrimary,
                                 ),
                               ),
                             ),
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 12,
-                                vertical: 4,
+                                vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: DesignSystem.backgroundLight,
-                                borderRadius: BorderRadius.circular(20),
+                                color: palette.overlaySoft,
+                                borderRadius: BorderRadius.circular(999),
                               ),
                               child: Text(
-                                '₹${court['price'] ?? 0}',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: DesignSystem.primaryIndigo,
+                                'Rs ${court['price'] ?? 0}',
+                                style: DesignSystem.bodyMedium.copyWith(
+                                  color: palette.primary,
+                                  fontWeight: DesignSystem.fontWeightSemiBold,
                                 ),
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: DesignSystem.spacing12),
+                        Wrap(
+                          spacing: DesignSystem.spacing8,
+                          runSpacing: DesignSystem.spacing8,
+                          children: [
+                            _CourtBadge(text: '${court['slot_type'] ?? 'hourly'} slots'),
+                            _CourtBadge(
+                              icon: Icons.wb_sunny_outlined,
+                              text:
+                                  '${_formatTime(court['morning_start'])} - ${_formatTime(court['morning_end'])}',
+                            ),
+                            _CourtBadge(
+                              icon: Icons.nightlight_round,
+                              text:
+                                  '${_formatTime(court['evening_start'])} - ${_formatTime(court['evening_end'])}',
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: DesignSystem.spacing16),
                         Row(
                           children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade100,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                court['slot_type'] ?? 'hourly',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey.shade700,
-                                ),
+                            Text(
+                              'View slots',
+                              style: DesignSystem.bodyMedium.copyWith(
+                                color: palette.primary,
+                                fontWeight: DesignSystem.fontWeightSemiBold,
                               ),
                             ),
-                            const SizedBox(width: 8),
-                            const Icon(Icons.access_time, size: 16, color: Colors.grey),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${_formatTime(court['morning_start'])} - ${_formatTime(court['morning_end'])}',
-                              style: const TextStyle(fontSize: 12, color: Colors.grey),
+                            const Spacer(),
+                            Icon(
+                              Icons.arrow_forward_rounded,
+                              color: palette.primary,
                             ),
                           ],
-                        ),
-                        const SizedBox(height: 4),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 24),
-                          child: Text(
-                            'Evening: ${_formatTime(court['evening_start'])} - ${_formatTime(court['evening_end'])}',
-                            style: const TextStyle(fontSize: 12, color: Colors.grey),
-                          ),
                         ),
                       ],
                     ),
@@ -220,6 +191,46 @@ class _UserCourtListScreenState extends ConsumerState<UserCourtListScreen> {
             },
           );
         },
+      ),
+    );
+  }
+}
+
+class _CourtBadge extends StatelessWidget {
+  const _CourtBadge({
+    required this.text,
+    this.icon,
+  });
+
+  final String text;
+  final IconData? icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = DesignSystem.paletteOf(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: palette.overlaySoft,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: palette.glassBorder),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 14, color: palette.primary),
+            const SizedBox(width: DesignSystem.spacing6),
+          ],
+          Text(
+            text,
+            style: DesignSystem.bodySmall.copyWith(
+              color: palette.textPrimary,
+              fontWeight: DesignSystem.fontWeightMedium,
+            ),
+          ),
+        ],
       ),
     );
   }

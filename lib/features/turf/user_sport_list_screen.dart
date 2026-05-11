@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../core/api/api_client.dart';
-import '../../core/theme/app_theme.dart';
-import 'user_court_list_screen.dart';  // ✅ FIXED: Correct relative path
+import '../../core/theme/design_system.dart';
+import '../../core/widgets/premium_widgets.dart';
+import 'user_court_list_screen.dart';
 
 class UserSportListScreen extends ConsumerStatefulWidget {
-  final Map<String, dynamic> turf;
+  const UserSportListScreen({
+    super.key,
+    required this.turf,
+  });
 
-  const UserSportListScreen({super.key, required this.turf});
+  final Map<String, dynamic> turf;
 
   @override
   ConsumerState<UserSportListScreen> createState() => _UserSportListScreenState();
@@ -26,23 +31,21 @@ class _UserSportListScreenState extends ConsumerState<UserSportListScreen> {
 
   void _fetchSports() {
     setState(() {
+      _errorMessage = null;
       _sportsFuture = _api.get("/sports/${widget.turf['id']}").then((response) {
-        if (response is List) {
-          return response;
-        }
-        return [];
+        return response is List ? response : <dynamic>[];
       }).catchError((error) {
-        setState(() {
-          _errorMessage = error.toString();
-        });
-        return [];
+        _errorMessage = error.toString();
+        return <dynamic>[];
       });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final palette = DesignSystem.paletteOf(context);
+
+    return PremiumScaffold(
       appBar: AppBar(
         title: Text(widget.turf['name'] ?? 'Select Sport'),
       ),
@@ -54,104 +57,110 @@ class _UserSportListScreenState extends ConsumerState<UserSportListScreen> {
           }
 
           if (snapshot.hasError || _errorMessage != null) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Error loading sports',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    _errorMessage ?? snapshot.error.toString(),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.grey),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
+            return Padding(
+              padding: DesignSystem.paddingAll24,
+              child: PremiumEmptyState(
+                title: 'Unable to load sports',
+                message: _errorMessage ?? snapshot.error.toString(),
+                action: SizedBox(
+                  width: 170,
+                  child: GlowButton(
+                    label: 'Retry',
                     onPressed: _fetchSports,
-                    child: const Text('Retry'),
                   ),
-                ],
+                ),
               ),
             );
           }
 
           final sports = snapshot.data ?? [];
-
           if (sports.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.sports, size: 64, color: Colors.grey),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No sports available',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'This turf hasn\'t added any sports yet',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                ],
+            return const Padding(
+              padding: DesignSystem.paddingAll24,
+              child: PremiumEmptyState(
+                title: 'No sports available',
+                message: 'This venue has not published sport categories yet.',
               ),
             );
           }
 
           return GridView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               mainAxisSpacing: 16,
               crossAxisSpacing: 16,
-              childAspectRatio: 1.2,
+              childAspectRatio: 0.92,
             ),
             itemCount: sports.length,
             itemBuilder: (context, index) {
               final sport = sports[index];
-              return GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => UserCourtListScreen(
-                        sport: sport,
-                        turfName: widget.turf['name'],
+              return GlassCard(
+                borderRadius: DesignSystem.borderRadiusLarge,
+                padding: const EdgeInsets.all(14),
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => UserCourtListScreen(
+                          sport: sport,
+                          turfName: widget.turf['name'] ?? 'Venue',
+                        ),
                       ),
-                    ),
-                  );
-                },
-                child: Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 2,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.sports_tennis,
-                          size: 48,
-                          color: DesignSystem.primaryIndigo,
+                    );
+                  },
+                  borderRadius: DesignSystem.borderRadiusLarge,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          color: palette.overlayStrong,
+                          shape: BoxShape.circle,
                         ),
-                        const SizedBox(height: 12),
-                        Text(
-                          sport['name'] ?? '',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                        child: Icon(
+                          _iconForSport(sport['name']?.toString() ?? ''),
+                          color: palette.primary,
+                          size: 28,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        sport['name'] ?? 'Sport',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: DesignSystem.headline5.copyWith(
+                          color: palette.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: DesignSystem.spacing8),
+                      Text(
+                        'View available courts and live slots',
+                        style: DesignSystem.bodySmall.copyWith(
+                          color: palette.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: DesignSystem.spacing12),
+                      Row(
+                        children: [
+                          Text(
+                            'Open',
+                            style: DesignSystem.bodyMedium.copyWith(
+                              color: palette.primary,
+                              fontWeight: DesignSystem.fontWeightSemiBold,
+                            ),
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
+                          const Spacer(),
+                          Icon(
+                            Icons.arrow_forward_rounded,
+                            color: palette.primary,
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               );
@@ -160,5 +169,13 @@ class _UserSportListScreenState extends ConsumerState<UserSportListScreen> {
         },
       ),
     );
+  }
+
+  IconData _iconForSport(String name) {
+    final normalized = name.toLowerCase();
+    if (normalized.contains('cricket')) return Icons.sports_cricket;
+    if (normalized.contains('football')) return Icons.sports_soccer;
+    if (normalized.contains('basketball')) return Icons.sports_basketball;
+    return Icons.sports_tennis;
   }
 }

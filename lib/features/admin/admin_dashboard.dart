@@ -5,7 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
 import '../../core/theme/design_system.dart';
 import '../../core/widgets/premium_widgets.dart';
-import '../../core/widgets/theme_toggle.dart';
+import '../../core/widgets/theme_dropdown.dart';
+import '../../core/widgets/theme_mode_menu_button.dart';
 import '../auth/auth_controller.dart';
 import 'add_turf_details_screen.dart';
 import 'admin_manage_turfs_screen.dart';
@@ -127,12 +128,10 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard>
     final palette = DesignSystem.paletteOf(context);
     return PremiumScaffold(
       appBar: AppBar(
-        title: const Text("Admin Dashboard"),
+        title: const Text("Admin"),
         actions: [
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 6),
-            child: ThemeSceneToggle(compact: true),
-          ),
+          const ThemeDropdown(),
+          const ThemeModeMenuButton(),
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
             onPressed: _fetchTurfs,
@@ -174,48 +173,44 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard>
   Widget _buildDrawer() {
     final palette = DesignSystem.paletteOf(context);
     return Drawer(
-      backgroundColor: DesignSystem.surfaceMuted,
+      backgroundColor: palette.backgroundBase,
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          const DrawerHeader(
+          DrawerHeader(
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFFEAE5FF), Color(0xFFD6CFFF), Color(0xFFC6BCFF)],
-              ),
+              gradient: palette.backgroundGradient,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CircleAvatar(
                   radius: 28,
-                  backgroundColor: DesignSystem.surfaceElevated,
+                  backgroundColor: palette.surfaceElevated,
                   child: Icon(
                     Icons.admin_panel_settings_rounded,
-                    color: DesignSystem.primaryIndigo,
+                    color: palette.primary,
                     size: 28,
                   ),
                 ),
                 SizedBox(height: DesignSystem.spacing16),
-                Text('Admin Panel', style: TextStyle(color: DesignSystem.textPrimary)),
+                Text('Admin Panel', style: TextStyle(color: palette.textPrimary)),
                 SizedBox(height: DesignSystem.spacing4),
                 Text(
                   'Manage your premium turf network',
-                  style: TextStyle(color: DesignSystem.textSecondary),
+                  style: TextStyle(color: palette.textSecondary),
                 ),
               ],
             ),
           ),
           ListTile(
             leading: Icon(Icons.dashboard_rounded, color: palette.primary),
-            title: Text('Dashboard', style: DesignSystem.bodyLarge),
+            title: Text('Dashboard', style: DesignSystem.bodyLarge.copyWith(color: palette.textPrimary)),
             onTap: () => Navigator.pop(context),
           ),
           ListTile(
             leading: Icon(Icons.location_city_rounded, color: palette.primary),
-            title: Text('Manage Turfs', style: DesignSystem.bodyLarge),
+            title: Text('Manage Turfs', style: DesignSystem.bodyLarge.copyWith(color: palette.textPrimary)),
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
@@ -226,7 +221,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard>
           ),
           ListTile(
             leading: Icon(Icons.person_rounded, color: palette.primary),
-            title: Text('Profile', style: DesignSystem.bodyLarge),
+            title: Text('Profile', style: DesignSystem.bodyLarge.copyWith(color: palette.textPrimary)),
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
@@ -237,10 +232,10 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard>
           ),
           const Divider(),
           ListTile(
-            leading: const Icon(Icons.logout_rounded, color: DesignSystem.error),
+            leading: Icon(Icons.logout_rounded, color: palette.error),
             title: Text(
               'Logout',
-              style: DesignSystem.bodyLarge.copyWith(color: DesignSystem.error),
+              style: DesignSystem.bodyLarge.copyWith(color: palette.error),
             ),
             onTap: () {
               Navigator.pop(context);
@@ -352,6 +347,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard>
   }
 
   Widget _buildTurfCard(dynamic turf) {
+    final palette = DesignSystem.paletteOf(context);
     return Padding(
       padding: DesignSystem.marginBottom16,
       child: GlassCard(
@@ -381,14 +377,14 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard>
                           vertical: 8,
                         ),
                         decoration: BoxDecoration(
-                          color: DesignSystem.overlayMedium,
+                          color: palette.overlaySoft,
                           borderRadius: DesignSystem.borderRadiusRound,
-                          border: Border.all(color: DesignSystem.glassBorder),
+                          border: Border.all(color: palette.glassBorder),
                         ),
                         child: Text(
                           'Rs ${turf['price_per_hour'] ?? 0}/hour',
                           style: DesignSystem.bodyMedium.copyWith(
-                            color: DesignSystem.accentLime,
+                            color: palette.primary,
                             fontWeight: DesignSystem.fontWeightSemiBold,
                           ),
                         ),
@@ -399,7 +395,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard>
                 Column(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.edit_rounded, color: DesignSystem.accentLime),
+                      icon: Icon(Icons.edit_rounded, color: palette.primary),
                       onPressed: () async {
                         await Navigator.push(
                           context,
@@ -411,7 +407,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard>
                       },
                     ),
                     IconButton(
-                      icon: const Icon(Icons.delete_outline_rounded, color: DesignSystem.error),
+                      icon: Icon(Icons.delete_outline_rounded, color: palette.error),
                       onPressed: () => _deleteTurf(turf['id']),
                     ),
                   ],
@@ -439,35 +435,47 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard>
               ],
             ),
             const SizedBox(height: DesignSystem.spacing16),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => SportListScreen(turf: turf),
-                        ),
-                      );
-                    },
-                    child: const Text("Manage Sports"),
-                  ),
-                ),
-                const SizedBox(width: DesignSystem.spacing12),
-                Expanded(
-                  child: GlowButton(
-                    label: 'View Bookings',
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Bookings feature coming soon!"),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final stackButtons = constraints.maxWidth < 430;
+                final buttonWidth = stackButtons
+                    ? constraints.maxWidth
+                    : (constraints.maxWidth - DesignSystem.spacing12) / 2;
+
+                return Wrap(
+                  spacing: DesignSystem.spacing12,
+                  runSpacing: DesignSystem.spacing12,
+                  children: [
+                    SizedBox(
+                      width: buttonWidth,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => SportListScreen(turf: turf),
+                            ),
+                          );
+                        },
+                        child: const Text("Manage Sports"),
+                      ),
+                    ),
+                    SizedBox(
+                      width: buttonWidth,
+                      child: GlowButton(
+                        label: 'View Bookings',
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Bookings feature coming soon!"),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           ],
         ),

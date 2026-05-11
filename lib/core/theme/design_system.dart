@@ -158,6 +158,7 @@ class DesignSystem {
   static const Color backgroundSecondary = Color(0xFFE8E4FF);
   static const Color surfaceGlass = Color(0xD9FFFFFF);
   static const Color surfaceElevated = Color(0xFFFFFFFF);
+  static const Color surfaceMuted = backgroundLight;
   static const Color accentLime = Color(0xFF7E61FF);
   static const Color glassBorder = Color(0x88FFFFFF);
 
@@ -529,6 +530,21 @@ class DesignSystem {
     );
   }
 
+  // Legacy decorations kept for older admin screens that still use static tokens.
+  static BoxDecoration get whiteCardDecoration => BoxDecoration(
+        color: backgroundWhite,
+        borderRadius: borderRadiusLarge,
+        border: Border.all(color: borderLight),
+        boxShadow: shadowSmall,
+      );
+
+  static BoxDecoration get cardDecoration => BoxDecoration(
+        color: surfaceElevated,
+        borderRadius: borderRadiusLarge,
+        border: Border.all(color: borderLight),
+        boxShadow: shadowSmall,
+      );
+
   static ThemeData get theme => lightTheme;
 
   static ThemeData get lightTheme => _buildTheme(
@@ -624,7 +640,7 @@ class DesignSystem {
         fillColor: Colors.transparent,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: spacing20,
-          vertical: spacing18,
+          vertical: spacing16,
         ),
         hintStyle: bodyMedium.copyWith(color: palette.textMuted),
         labelStyle: bodyMedium.copyWith(color: palette.textSecondary),
@@ -716,6 +732,10 @@ class DesignSystem {
       ),
     );
   }
+}
+
+extension AppPaletteLegacy on AppPalette {
+  Color get textWhite => DesignSystem.textWhite;
 }
 
 extension OldAppTheme on DesignSystem {

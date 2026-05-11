@@ -172,6 +172,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard>
   }
 
   Widget _buildDrawer() {
+    final palette = DesignSystem.paletteOf(context);
     return Drawer(
       backgroundColor: DesignSystem.surfaceMuted,
       child: ListView(

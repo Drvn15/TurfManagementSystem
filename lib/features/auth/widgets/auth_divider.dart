@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/design_system.dart';
 
 class AuthDivider extends StatelessWidget {
-  static const Color _border = Color(0xFFE3E3E3);
-  static const Color _textLight = Color(0xFF8E8E8E);
-
   const AuthDivider({super.key});
 
   @override
@@ -15,7 +12,7 @@ class AuthDivider extends StatelessWidget {
         Expanded(
           child: Container(
             height: 1,
-            color: _border,
+            color: DesignSystem.glassBorder,
           ),
         ),
         Padding(
@@ -23,7 +20,7 @@ class AuthDivider extends StatelessWidget {
           child: Text(
             'OR',
             style: DesignSystem.bodyMedium.copyWith(
-              color: _textLight,
+              color: DesignSystem.textMuted,
               fontWeight: DesignSystem.fontWeightMedium,
             ),
           ),
@@ -31,7 +28,7 @@ class AuthDivider extends StatelessWidget {
         Expanded(
           child: Container(
             height: 1,
-            color: _border,
+            color: DesignSystem.glassBorder,
           ),
         ),
       ],

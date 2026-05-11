@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/design_system.dart';
+import '../../core/widgets/premium_widgets.dart';
 import 'auth_controller.dart';
 import 'auth_state.dart';
 import 'signup_screen.dart';
@@ -20,11 +21,6 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  static const Color _background = DesignSystem.backgroundLavender;
-  static const Color _textPrimary = Colors.black;
-  static const Color _textSecondary = Color(0xFF5A5A5A);
-  static const Color _accent = Colors.black;
-
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
@@ -41,9 +37,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> handleLogin() async {
-    if (_isLoading) {
-      return;
-    }
+    if (_isLoading) return;
 
     setState(() {
       _errorMessage = null;
@@ -55,21 +49,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             phoneController.text.trim(),
             passwordController.text.trim(),
           );
-
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        _isLoading = false;
-      });
+      if (!mounted) return;
+      setState(() => _isLoading = false);
     } catch (_) {
-      if (!mounted) {
-        return;
-      }
-
+      if (!mounted) return;
       setState(() {
-        _errorMessage = 'Login failed. Please check your credentials.';
+        _errorMessage = 'Sign in failed. Check your phone number and password.';
         _isLoading = false;
       });
     }
@@ -77,14 +62,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   void _showComingSoon(String label) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$label is not connected yet.'),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: _accent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(DesignSystem.radiusMedium),
-        ),
-      ),
+      SnackBar(content: Text('$label is not connected yet.')),
     );
   }
 
@@ -92,179 +70,144 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
 
-    return Scaffold(
-      backgroundColor: _background,
+    return PremiumScaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(
-            DesignSystem.spacing24,
-            DesignSystem.spacing24,
-            DesignSystem.spacing24,
-            DesignSystem.spacing32,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: DesignSystem.spacing24),
-              const AuthHeader(
-                title: 'Welcome Back!',
-                subtitle: 'Sign in to continue',
-                showLogo: true,
-              ),
-              const SizedBox(height: DesignSystem.spacing32),
-              AuthInputField(
-                controller: phoneController,
-                hintText: 'Phone Number',
-                prefixIcon: Icons.phone_outlined,
-                keyboardType: TextInputType.phone,
-              ),
-              const SizedBox(height: DesignSystem.spacing16),
-              AuthInputField(
-                controller: passwordController,
-                hintText: 'Password',
-                prefixIcon: Icons.lock_outline,
-                obscureText: !_isPasswordVisible,
-                suffixIcon: IconButton(
-                  onPressed: () {
-                    setState(() {
-                      _isPasswordVisible = !_isPasswordVisible;
-                    });
-                  },
-                  icon: Icon(
-                    _isPasswordVisible
-                        ? Icons.visibility_off_outlined
-                        : Icons.visibility_outlined,
-                    color: DesignSystem.textSecondary,
-                  ),
-                ),
-              ),
-              const SizedBox(height: DesignSystem.spacing12),
-              Row(
-                children: [
-                  Transform.scale(
-                    scale: 0.95,
-                    child: Checkbox(
-                      value: _rememberMe,
-                      onChanged: (value) {
-                        setState(() {
-                          _rememberMe = value ?? false;
-                        });
-                      },
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: GlassCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const AuthHeader(
+                      title: 'Book elite sports venues',
+                      subtitle:
+                          'Sign in to access live availability, instant booking, and premium turf experiences.',
+                      showLogo: true,
                     ),
-                  ),
-                  Text(
-                    'Remember me',
-                    style: DesignSystem.bodyMedium.copyWith(
-                      color: _textSecondary,
+                    const SizedBox(height: DesignSystem.spacing32),
+                    AuthInputField(
+                      controller: phoneController,
+                      labelText: 'Phone Number',
+                      hintText: 'Enter your mobile number',
+                      prefixIcon: Icons.phone_android_rounded,
+                      keyboardType: TextInputType.phone,
                     ),
-                  ),
-                  const Spacer(),
-                  TextButton(
-                    onPressed: () => _showComingSoon('Forgot password'),
-                    child: Text(
-                      'Forgot password?',
-                      style: DesignSystem.bodyMedium.copyWith(
-                        color: _accent,
-                        fontWeight: DesignSystem.fontWeightSemiBold,
+                    const SizedBox(height: DesignSystem.spacing16),
+                    AuthInputField(
+                      controller: passwordController,
+                      labelText: 'Password',
+                      hintText: 'Enter your password',
+                      prefixIcon: Icons.lock_outline_rounded,
+                      obscureText: !_isPasswordVisible,
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _isPasswordVisible = !_isPasswordVisible;
+                          });
+                        },
+                        icon: Icon(
+                          _isPasswordVisible
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              if (_errorMessage != null) ...[
-                const SizedBox(height: DesignSystem.spacing8),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(DesignSystem.spacing12),
-                  decoration: BoxDecoration(
-                    color: DesignSystem.error.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(DesignSystem.radiusMedium),
-                    border: Border.all(
-                      color: DesignSystem.error.withOpacity(0.2),
+                    const SizedBox(height: DesignSystem.spacing12),
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: _rememberMe,
+                          onChanged: (value) {
+                            setState(() => _rememberMe = value ?? false);
+                          },
+                        ),
+                        Text('Remember me', style: DesignSystem.bodyMedium),
+                        const Spacer(),
+                        TextButton(
+                          onPressed: () => _showComingSoon('Forgot password'),
+                          child: const Text('Forgot password?'),
+                        ),
+                      ],
                     ),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        color: DesignSystem.error,
-                        size: 20,
-                      ),
-                      const SizedBox(width: DesignSystem.spacing8),
-                      Expanded(
+                    if (_errorMessage != null) ...[
+                      const SizedBox(height: DesignSystem.spacing12),
+                      Container(
+                        width: double.infinity,
+                        padding: DesignSystem.paddingAll16,
+                        decoration: BoxDecoration(
+                          color: DesignSystem.error.withValues(alpha: 0.12),
+                          borderRadius: DesignSystem.borderRadiusLarge,
+                          border: Border.all(color: DesignSystem.error),
+                        ),
                         child: Text(
                           _errorMessage!,
                           style: DesignSystem.bodyMedium.copyWith(
-                            color: DesignSystem.error,
+                            color: DesignSystem.textPrimary,
                           ),
                         ),
                       ),
                     ],
-                  ),
-                ),
-              ],
-              const SizedBox(height: DesignSystem.spacing24),
-              AuthButton(
-                label: 'Sign In',
-                isLoading: _isLoading || authState.status == AuthStatus.loading,
-                onPressed: handleLogin,
-              ),
-              const SizedBox(height: DesignSystem.spacing24),
-              const AuthDivider(),
-              const SizedBox(height: DesignSystem.spacing24),
-              SocialLoginButton(
-                label: 'Continue with Google',
-                icon: Icons.g_mobiledata_rounded,
-                iconColor: _textPrimary,
-                onPressed: () => _showComingSoon('Google sign in'),
-              ),
-              const SizedBox(height: DesignSystem.spacing12),
-              SocialLoginButton(
-                label: 'Continue with Apple',
-                icon: Icons.apple,
-                iconColor: _textPrimary,
-                onPressed: () => _showComingSoon('Apple sign in'),
-              ),
-              const SizedBox(height: DesignSystem.spacing32),
-              AuthToggleLink(
-                prompt: 'Don\'t have an account? ',
-                actionLabel: 'Sign Up',
-                onTap: () {
-                  Navigator.of(context).push(
-                    PageRouteBuilder<void>(
-                      transitionDuration: DesignSystem.animationPage,
-                      reverseTransitionDuration: DesignSystem.animationPage,
-                      pageBuilder: (context, animation, secondaryAnimation) =>
-                          const SignUpScreen(),
-                      transitionsBuilder: (
-                        context,
-                        animation,
-                        secondaryAnimation,
-                        child,
-                      ) {
-                        final offsetAnimation = Tween<Offset>(
-                          begin: const Offset(0.12, 0),
-                          end: Offset.zero,
-                        ).animate(
-                          CurvedAnimation(
-                            parent: animation,
-                            curve: Curves.easeOutCubic,
-                          ),
-                        );
-
-                        return FadeTransition(
-                          opacity: animation,
-                          child: SlideTransition(
-                            position: offsetAnimation,
-                            child: child,
+                    const SizedBox(height: DesignSystem.spacing24),
+                    AuthButton(
+                      label: 'Sign In',
+                      isLoading: _isLoading || authState.status == AuthStatus.loading,
+                      onPressed: handleLogin,
+                    ),
+                    const SizedBox(height: DesignSystem.spacing24),
+                    const AuthDivider(),
+                    const SizedBox(height: DesignSystem.spacing24),
+                    SocialLoginButton(
+                      label: 'Continue with Google',
+                      icon: Icons.g_mobiledata_rounded,
+                      iconColor: DesignSystem.textPrimary,
+                      onPressed: () => _showComingSoon('Google sign in'),
+                    ),
+                    const SizedBox(height: DesignSystem.spacing12),
+                    SocialLoginButton(
+                      label: 'Continue with Apple',
+                      icon: Icons.apple_rounded,
+                      iconColor: DesignSystem.textPrimary,
+                      onPressed: () => _showComingSoon('Apple sign in'),
+                    ),
+                    const SizedBox(height: DesignSystem.spacing24),
+                    AuthToggleLink(
+                      prompt: 'New to Turf Booking? ',
+                      actionLabel: 'Create account',
+                      onTap: () {
+                        Navigator.of(context).push(
+                          PageRouteBuilder<void>(
+                            transitionDuration: DesignSystem.animationPage,
+                            reverseTransitionDuration: DesignSystem.animationPage,
+                            pageBuilder: (context, animation, secondaryAnimation) =>
+                                const SignUpScreen(),
+                            transitionsBuilder: (
+                              context,
+                              animation,
+                              secondaryAnimation,
+                              child,
+                            ) {
+                              return FadeTransition(
+                                opacity: animation,
+                                child: SlideTransition(
+                                  position: Tween<Offset>(
+                                    begin: const Offset(0.06, 0),
+                                    end: Offset.zero,
+                                  ).animate(animation),
+                                  child: child,
+                                ),
+                              );
+                            },
                           ),
                         );
                       },
                     ),
-                  );
-                },
+                  ],
+                ),
               ),
-            ],
+            ),
           ),
         ),
       ),

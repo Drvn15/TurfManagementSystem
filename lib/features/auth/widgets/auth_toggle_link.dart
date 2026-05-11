@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/design_system.dart';
 
 class AuthToggleLink extends StatelessWidget {
-  static const Color _textSecondary = Color(0xFF5A5A5A);
-  static const Color _accent = Colors.black;
-
   final String prompt;
   final String actionLabel;
   final VoidCallback onTap;
@@ -25,7 +22,7 @@ class AuthToggleLink extends StatelessWidget {
         Text(
           prompt,
           style: DesignSystem.bodyMedium.copyWith(
-            color: _textSecondary,
+            color: DesignSystem.textSecondary,
           ),
         ),
         GestureDetector(
@@ -33,7 +30,7 @@ class AuthToggleLink extends StatelessWidget {
           child: Text(
             actionLabel,
             style: DesignSystem.bodyMedium.copyWith(
-              color: _accent,
+              color: DesignSystem.accentLime,
               fontWeight: DesignSystem.fontWeightSemiBold,
             ),
           ),

@@ -3,15 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/design_system.dart';
 
 class SocialLoginButton extends StatelessWidget {
-  static const Color _surface = Colors.white;
-  static const Color _border = Color(0xFFE5E5E5);
-  static const Color _textPrimary = Colors.black;
-
-  final String label;
-  final IconData icon;
-  final Color iconColor;
-  final VoidCallback onPressed;
-
   const SocialLoginButton({
     super.key,
     required this.label,
@@ -20,6 +11,11 @@ class SocialLoginButton extends StatelessWidget {
     required this.onPressed,
   });
 
+  final String label;
+  final IconData icon;
+  final Color iconColor;
+  final VoidCallback onPressed;
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -27,25 +23,20 @@ class SocialLoginButton extends StatelessWidget {
       height: DesignSystem.spacing56,
       child: OutlinedButton.icon(
         onPressed: onPressed,
-        icon: Icon(
-          icon,
-          size: 22,
-          color: iconColor,
-        ),
+        icon: Icon(icon, size: 20, color: iconColor),
         label: Text(
           label,
-          style: DesignSystem.button.copyWith(
-            color: _textPrimary,
-            fontWeight: DesignSystem.fontWeightMedium,
+          style: DesignSystem.bodyMedium.copyWith(
+            color: DesignSystem.textPrimary,
+            fontWeight: DesignSystem.fontWeightSemiBold,
           ),
         ),
         style: OutlinedButton.styleFrom(
-          backgroundColor: _surface,
-          side: const BorderSide(color: _border),
+          backgroundColor: DesignSystem.surfaceGlass,
+          side: const BorderSide(color: DesignSystem.glassBorder),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(DesignSystem.radiusLarge),
           ),
-          elevation: 0,
         ),
       ),
     );

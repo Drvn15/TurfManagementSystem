@@ -3,15 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/design_system.dart';
 
 class AuthHeader extends StatelessWidget {
-  static const Color _textPrimary = Colors.black;
-  static const Color _textSecondary = Color(0xFF5F5F5F);
-  static const Color _surface = Colors.white;
-
-  final String title;
-  final String subtitle;
-  final bool showLogo;
-  final bool centerAligned;
-
   const AuthHeader({
     super.key,
     required this.title,
@@ -20,6 +11,11 @@ class AuthHeader extends StatelessWidget {
     this.centerAligned = false,
   });
 
+  final String title;
+  final String subtitle;
+  final bool showLogo;
+  final bool centerAligned;
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -27,43 +23,31 @@ class AuthHeader extends StatelessWidget {
           centerAligned ? CrossAxisAlignment.center : CrossAxisAlignment.start,
       children: [
         if (showLogo)
-          Center(
-            child: Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: _surface,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 24,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.sports_soccer,
-                color: _textPrimary,
-                size: 40,
-              ),
+          Container(
+            width: 76,
+            height: 76,
+            decoration: BoxDecoration(
+              gradient: DesignSystem.primaryGradient,
+              shape: BoxShape.circle,
+              boxShadow: DesignSystem.glowShadow,
+            ),
+            child: const Icon(
+              Icons.sports_soccer_rounded,
+              size: 34,
+              color: DesignSystem.backgroundBase,
             ),
           ),
-        if (showLogo) const SizedBox(height: DesignSystem.spacing32),
+        if (showLogo) const SizedBox(height: DesignSystem.spacing24),
         Text(
           title,
           textAlign: centerAligned ? TextAlign.center : TextAlign.start,
-          style: DesignSystem.headline1.copyWith(
-            color: _textPrimary,
-          ),
+          style: DesignSystem.displayMedium,
         ),
         const SizedBox(height: DesignSystem.spacing8),
         Text(
           subtitle,
           textAlign: centerAligned ? TextAlign.center : TextAlign.start,
-          style: DesignSystem.bodyLarge.copyWith(
-            color: _textSecondary,
-          ),
+          style: DesignSystem.bodyMedium,
         ),
       ],
     );
